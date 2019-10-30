@@ -30,6 +30,7 @@ private:
 	void updateTime();
 	void debugPrintAction()const;
 	int getEstimatedValue();
+	void calculateActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
  private: 
 	Node root; 
 	std::stack<Action> actionStack;
@@ -39,17 +40,15 @@ private:
 	bool timeOver;
 	int timeCheckCount = 100;
 	time_t lastTime; 
-	int maxDeep = 10;
-	int deep = 0;
+	int deepMax = 10;
+	int deepCurrent = 0;
 	int maxDeepLast = 0;
 	int rootHashValue; 
 	static std::unordered_map<int, int> rootHashMap[17][17];
 	std::vector<Chess*> aiChessCandidate;
 	std::vector<Chess*> playerChessCandidate;
 	int aiChessCount;
-	int playerChessCount;
-	//int searchWindow = 2000;
-	//int searchGradient = 1000;
+	int playerChessCount; 
 	Chess* aiKingChess;
 	Chess* playerKingChess;   
 };
