@@ -6,8 +6,9 @@
 #include<algorithm>
 #include"hash.h"
 
-std::unordered_map<int, int> Tree::rootHashMap[17][17];
-
+std::unordered_map<HashKeyType, int> Tree::rootHashMap[17][17];
+SearchResultHash Tree::aiResultHash;
+SearchResultHash Tree::playerResultHash;
 
 Tree::Tree(int state[10][9]):root(state)
 {
@@ -51,7 +52,7 @@ Tree::Tree(int state[10][9]):root(state)
 		{
 			rootHashMap[i][j].clear();
 		}
-	}
+	} 
 }
 
 
@@ -78,15 +79,14 @@ void Tree::updateTime()
 
 Decision* Tree::deepSearch()
 {
-	//minThinkTime = 10;
-	////maxThinkTime = minThinkTime = 100000;
-	//maxDeep = 20;
-	//lastTime = std::time(nullptr);
-	//auto last= deepSearch(2);
+	lastTime = std::time(nullptr);
+	////minThinkTime = 10;
+	//maxThinkTime = minThinkTime = 100000; 
+	//auto last= deepSearch(6);
 	//std::cout << "think step -> " << 2 << ", max deep last -> " << maxDeepLast
 	//	<< " (" << last->fromX << ',' << last->fromY << ") -> (" << last->desX << ',' << last->desY << ')' << std::endl;
 	//return last;
-	////auto d = deepSearch(2);
+	//auto d = deepSearch(2);
 	timeCheckCount = 100;
 	//timeCheckCount = 10000000000000;
 	//auto d = deepSearch(4);
@@ -96,10 +96,10 @@ Decision* Tree::deepSearch()
 	int stepIncrement = 1;
 	for (; step<20; step += stepIncrement)
 	{
-		maxDeepLast = 0;
+		depthMaxLast = 0;
 		lastTime = std::time(nullptr);
 		std::cout << "try step: " << step << std::endl;
-		deepMax = std::max(10, step *2);
+		depthMax = std::max(5, step *2);
 		auto decision = deepSearch(step);
 		if (timeOver)
 		{
@@ -117,25 +117,25 @@ Decision* Tree::deepSearch()
 			break;
 		} 
 	}
-	std::cout << "think step -> " << step << ", max last -> " << maxDeepLast
+	std::cout << "think step -> " << step << ", max last -> " << depthMaxLast
 		<<"("<<lastDecision->fromX<<','<<lastDecision->fromY<<") -> ("<<lastDecision->desX<<','<<lastDecision->desY<<')'<< std::endl;
 	return lastDecision;
 }
 
 int Tree::getEstimatedValue()
-{
-	auto& map = rootHashMap[aiChessCount][playerChessCount];
-	auto it = map.find(rootHashValue);
-	if (it != map.end())
-	{
-		return it->second;
-	}
+{ 
+	//auto& map = rootHashMap[aiChessCount][playerChessCount];
+	//auto it = map.find(rootHashValue);
+	//if (it != map.end())
+	//{ 
+	//	return it->second;
+	//}
 	auto value = root.getEstimatedValue(aiChessCandidate, playerChessCandidate);
-	map[rootHashValue] = value;
+	//map[rootHashValue] = value; 
 	return value;
 }
 
-void Tree::calculateActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
+void Tree::appendActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
 {
 	Action actionTemp;
 	for (size_t i = 0; i < chessCandidate.size(); i++)
@@ -158,23 +158,27 @@ void Tree::calculateActionCandidate(const std::vector<Chess*>& chessCandidate, S
 			}
 		}
 	}
+	 constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 5}; 
+ std::sort(actionCandidate.begin(),actionCandidate.end(),
+ [&chessPriority](Action& a, Action& b) {return chessPriority[a.coveredChessType] > chessPriority[b.coveredChessType]; });
+ 
 }
  
 
-struct Decision* Tree::deepSearch(int deepTotal)
+Decision* Tree::deepSearch(int depthTotal)
 { 
 	Action bestAction{ nullptr,nullptr,None };
 	Position from(0,0);  
-	int alpha = INT32_MIN;	
-	int beta = INT32_MAX;   
+	int alpha = -20000000;
+	int beta = 20000000;
 	SimpleList<Action, 100> actionCandidate;
-	calculateActionCandidate(aiChessCandidate, actionCandidate);
+	appendActionCandidate(aiChessCandidate, actionCandidate);
 	int value = 0;
 	bool hasPVValue = false;
 	for (auto& action : actionCandidate)
 	{
-		doAction(action);
-		int nextDeep = action.coveredChessType == None ? deepTotal - 1 : deepTotal;
+		doAction(action); 
+		int nextDeep = action.coveredChessType == None ? depthTotal - 1 : depthTotal;
 		if (hasPVValue)
 		{
 			value = deepSearchMin(nextDeep, alpha, alpha + 1);
@@ -187,15 +191,21 @@ struct Decision* Tree::deepSearch(int deepTotal)
 		{
 			value = deepSearchMin(nextDeep, alpha, beta);
 		}
-		if (value > alpha)
+		if (value > alpha&&value < beta)
 		{
 			alpha = value;
-			bestAction = actionStack.top(); 
+			bestAction = actionStack.top();
 			hasPVValue = true;
 		}
 		undoAction();
 	}
-	std::cout << "max value " << alpha << std::endl;  
+	if (timeOver)
+	{ 
+		std::cout << "time over" << std::endl;
+		return nullptr;
+	}
+	std::cout << "max value " << alpha << " best aciton: " << "(" << bestAction.from->x << ','
+		<< bestAction.from->y << ") -> (" << bestAction.des->x << ',' << bestAction.des->y << ')' << std::endl;
 	auto decision = new Decision;
  
 	decision->fromX = bestAction.from->x;
@@ -205,115 +215,200 @@ struct Decision* Tree::deepSearch(int deepTotal)
 	return decision;
 }
 
-int Tree::deepSearchMax(int deepLeft, int alpha, int beta)
+int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 {// think in Black(AI)
 	if (aiKingChess->type == None)
 	{
-		return INT32_MIN;
+		return -10000000;
 	}
-	if (deepLeft == 0)
+	auto result = aiResultHash.getHash(rootHashValue); 
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		if (result->type == SearchResult::PV)
+		{
+			return result->value;
+		}
+		if (result->type == SearchResult::Alpha&&result->value <= alpha)
+		{
+			return alpha;
+		}
+		if (result->type == SearchResult::Beta&&result->value >= beta)
+		{
+			return beta;
+		}
+	}
+	if (depthLeft == 0)
 	{
 		return getEstimatedValue();
 	}
-	if (deepCurrent >= deepMax)
-	{
-		return alpha;
+	if (depthCurrent >= depthMax)
+	{ 
+		return   getEstimatedValue();
 	}
+	//if (depthLeft > 3)
+	//{
+	//	if (deepSearchMin(depthLeft - 3, beta - 1, beta) >= beta &&
+	//		deepSearchMin(depthLeft - 2, beta - 1, beta) >= beta)
+	//	{
+	//		return beta;
+	//	}
+	//}
+	//if (depthLeft > 3)
+	//{
+	//	if (deepSearchMin(depthLeft - 3, beta-1, beta) < beta)
+	//	{
+	//		return beta;
+	//	}
+	//}
 	updateTime();
 	if (timeOver)
 	{
-		return alpha;
+		return  getEstimatedValue();;
 	}
 	bool hasPVValue = false;
 	SimpleList<Action, 100> actionCandidate;
-	calculateActionCandidate(aiChessCandidate, actionCandidate); 
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		actionCandidate.push_back(result->bestAction);
+	}
+	appendActionCandidate(aiChessCandidate, actionCandidate);
+	Action bestAction = actionCandidate[0];
 	int value = 0;
 	for (auto& action : actionCandidate)
 	{ 
 		doAction(action);
-		int nextDeep = action.coveredChessType == None ? deepLeft - 1 : deepLeft;
+		//int nextDepth = action.coveredChessType == None ? depthLeft - 1 : depthLeft;
+		int nextDepth = depthLeft - 1;
+		if (nextDepth == 0 && action.coveredChessType != None)
+		{
+			nextDepth = 1;
+		}
 		if (hasPVValue)
 		{
-			value = deepSearchMin(nextDeep, alpha, alpha + 1);
+			value = deepSearchMin(nextDepth, alpha, alpha + 1);
 			if (value > alpha&&value <= beta)
 			{
-				value = deepSearchMin(nextDeep, alpha, beta);
+				value = deepSearchMin(nextDepth, alpha, beta);
 			}
 		}
 		else
 		{
-			value = deepSearchMin(nextDeep, alpha, beta);
+			value = deepSearchMin(nextDepth, alpha, beta);
 		}
 		undoAction();
 		if (value >= beta)
 		{
-			return value;
+			bestAction = action;
+			aiResultHash.updateHash({ rootHashValue,depthLeft,SearchResult::Beta,beta,bestAction }); 
+			return beta;
 		}
 		else if (value > alpha)
 		{
 			alpha = value;
 			hasPVValue = true;
+			bestAction = action;
 		}
 	}
+	aiResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Alpha,alpha,bestAction });
 	return alpha;
 } 
 
-int Tree::deepSearchMin(int levelLeft, int alpha, int beta)
-{// think in Red(Player)	 
+
+
+int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
+{// think in Red(Player)
 	if (playerKingChess->type == None)
 	{
-		return INT32_MAX;
+		return 10000000;
 	}
-	if (levelLeft == 0)
+	auto result = playerResultHash.getHash(rootHashValue);
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		if (result->type == SearchResult::PV)
+		{
+			return result->value;
+		}
+		if (result->type == SearchResult::Alpha&&result->value <= alpha)
+		{
+			return alpha;
+		}		
+		if (result->type == SearchResult::Beta&&result->value >= beta)
+		{
+			return beta;
+		} 
+	}
+	if (depthLeft == 0)
 	{
 		return getEstimatedValue();
-	} 
-	if (deepCurrent >= deepMax)
-	{
-		return beta;
 	}
+	if (depthCurrent >= depthMax)
+	{
+		return getEstimatedValue();
+	}
+	//if (depthLeft > 3)
+	//{
+	//	if (deepSearchMax(depthLeft - 3, alpha, alpha + 1) <= alpha&&
+	//		deepSearchMax(depthLeft - 2, alpha, alpha + 1) <= alpha)
+	//	{
+	//		return alpha;
+	//	}
+	//}
+
 	updateTime();
 	if (timeOver)
 	{
-		return beta;
+		return  getEstimatedValue();;
 	} 
 	bool hasPVValue = false;
 	SimpleList<Action, 100> actionCandidate;
-	calculateActionCandidate(playerChessCandidate, actionCandidate);
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		actionCandidate.push_back(result->bestAction);
+	}
+	appendActionCandidate(playerChessCandidate, actionCandidate);
+	Action bestAction = actionCandidate[0];
 	int value = 0;
 	for (auto& action : actionCandidate)
 	{
-		doAction(action);
-		int nextLevel = action.coveredChessType == None ? levelLeft - 1 : levelLeft;
+		doAction(action); 
+		//int nextDepth = action.coveredChessType == None ? depthLeft - 1 : depthLeft;
+		int nextDepth = depthLeft - 1;
+		if (nextDepth == 0 && action.coveredChessType != None)
+		{
+			nextDepth = 1;
+		}
 		if (hasPVValue)
 		{
-			value = deepSearchMax(nextLevel, alpha, alpha + 1);
+			value = deepSearchMax(nextDepth, beta-1, beta);
 			if (value >= alpha && value < beta)
 			{
-				value = deepSearchMax(nextLevel, alpha, beta);
-			}
+				value = deepSearchMax(nextDepth, alpha, beta);
+			} 
 		}
 		else
 		{
-			value = deepSearchMax(nextLevel, alpha, beta);
+			value = deepSearchMax(nextDepth, alpha, beta); 
 		}
 		undoAction();
 		if (value <= alpha)
 		{
-			return value;
+			bestAction = action;
+			playerResultHash.updateHash({ rootHashValue,depthLeft,SearchResult::Alpha,alpha,bestAction }); 
+			return alpha;
 		}
 		else if (value < beta)
 		{
 			beta = value;
 			hasPVValue = true;
+			bestAction = action;
 		}
-	} 
+	}
+	playerResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Beta,beta,bestAction });
 	return beta;
 }
 
 void Tree::doAction(const Action& action)
 {  
-	nodeValueStack.push(getEstimatedValue());
 	auto from = action.from;
 	auto des = action.des;
 	Debug::assert(des->chess->isNoneTypeChess() || from->chess->isHostile(des->chess));
@@ -328,10 +423,10 @@ void Tree::doAction(const Action& action)
 	des->chess->setY(des->y);
 	from->chess->setType(None); 
 	actionStack.push(action);
-	deepCurrent++;
-	if (deepCurrent > maxDeepLast)
+	depthCurrent++;
+	if (depthCurrent > depthMaxLast)
 	{
-		maxDeepLast = deepCurrent;
+		depthMaxLast = depthCurrent;
 	}
 	rootHashValue ^= getChessPositionHash(from);
 	rootHashValue ^= getChessPositionHash(des);
@@ -364,10 +459,9 @@ void Tree::undoAction()
 	des->chess->setX(des->x);
 	des->chess->setY(des->y);
 	des->chess->setType(action.coveredChessType);
-	deepCurrent--;
+	depthCurrent--;
 	rootHashValue ^= getChessPositionHash(from);
-	rootHashValue ^= getChessPositionHash(des);
-	nodeValueStack.pop();
+	rootHashValue ^= getChessPositionHash(des); 
 	if (action.coveredChessType != None)
 	{
 		if (from->chess->country == Black)

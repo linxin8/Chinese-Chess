@@ -62,23 +62,23 @@ namespace ChessGame
             //};           
             var testMap = new int[10, 9]
             {
-                 {00,00,15,16,17,16,15,00,13},
+                 {13,14,15,16,17,16,15,14,13},
                  {00,00,00,00,00,00,00,00,00},
-                 {00,00,14,00,00,00,14,00,00},
+                 {00,12,00,00,12,00,00,00,00},
                  {11,00,11,00,11,00,11,00,11},
-                 {00,23,00,00,00,00,00,00,00},
-                 {00,00,21,00,00,00,21,00,00},
-                 {21,00,00,00,12,00,00,12,21},
-                 {00,00,24,22,22,00,24,00,00},
-                 {00,00,00,00,26,00,00,00,00},
-                 {00,00,25,00,27,26,25,00,23},
+                 {00,00,00,00,00,00,00,00,00},
+                 {00,00,00,00,00,00,00,00,00},
+                 {21,00,21,00,21,00,21,00,21},
+                 {00,22,00,00,22,00,24,00,00},
+                 {00,00,00,00,00,00,00,00,00},
+                 {23,24,25,26,27,26,25,00,23}
             };
             var version = DecisionTreeDll.GetVersion();
             var name = DecisionTreeDll.GetName();
             //var decision = new DecisionTreeDllDecision();
-            //var dllMap = logicMap.GetDLLMap();
+            var dllMap = logicMap.GetDLLMap();
             DecisionTreeDll.GetDecision(testMap, out DecisionTreeDllDecision decision);
-            Console.WriteLine($"{decision.fromX},{decision.fromY}->{decision.desX},{decision.desY}");
+            //Console.WriteLine($"{decision.fromX},{decision.fromY}->{decision.desX},{decision.desY}");
             //var positions=DecisionTreeDll.GetAccessiblePosition(logicMap.GetDLLMap(), 0, 0);
             //Console.WriteLine($"{positions.Count}");
         }

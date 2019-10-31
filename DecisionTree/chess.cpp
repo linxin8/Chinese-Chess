@@ -4,6 +4,9 @@
 #include<algorithm>
 
 
+
+#define isInRange(value,min,max) (min <= value && value < max)
+
 Chess* Chess::newInstance(Node* node, int x, int y, ChessType type, ChessCountry country)
 {
 	switch (type)
@@ -38,9 +41,10 @@ void Chess::updateTarget()
 }
 void Chess::sortAssaultableTarget()
 {
-	constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 5}; 
-	std::sort(target->assaultableList.position, target->assaultableList.position + target->assaultableList.length,
-		[&chessPriority](ChessPosition* a, ChessPosition*  b) {return chessPriority[a->chess->type] > chessPriority[b->chess->type]; });
+//	constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 5}; 
+//	std::sort(target->assaultableList.position, target->assaultableList.position + target->assaultableList.length,
+//		[&chessPriority](ChessPosition* a, ChessPosition*  b) {return chessPriority[a->chess->type] > chessPriority[b->chess->type]; });
+//
 }
 
 const Position PawnChess::relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
@@ -69,7 +73,7 @@ void PawnChess::recomputeTargetPositionInfo()
 		y = py + i.y;
 		if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
 		{
-			auto cp = node->getChessPositoin(x, y);
+			auto cp = &node->board[y][x];
 			if (cp->chess->type==None)
 			{
 				target->moveableList.push_back(cp);
@@ -94,7 +98,7 @@ void CannonChess::recomputeTargetPositionInfo()
 	{
 		for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
 		{
-			auto cp = node->getChessPositoin(x, y);
+			auto cp = &node->board[y][x];
 			if (cp->chess->type == None)
 			{
 				target->moveableList.push_back(cp);
@@ -103,7 +107,7 @@ void CannonChess::recomputeTargetPositionInfo()
 			{
 				for (x += v.x, y += v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
 				{
-					cp = node->getChessPositoin(x, y);
+					cp = &node->board[y][x];
 					if (cp->chess->type != None)
 					{ 
 						if (cp->chess->country != country)
@@ -132,7 +136,7 @@ void RookChess::recomputeTargetPositionInfo()
 	{
 		for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
 		{
-			auto cp = node->getChessPositoin(x, y);
+			auto cp = &node->board[y][x];
 			if (cp->chess->type==None)
 			{
 				target->moveableList.push_back(cp);
@@ -163,8 +167,8 @@ void KnightChess::recomputeTargetPositionInfo()
 		if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
 		{
 			if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
-			{
-				auto cp = node->getChessPositoin(x, y);
+			{ 
+				auto cp = &node->board[y][x];
 				if (cp->chess->type == None)
 				{
 					target->moveableList.push_back(cp);
@@ -197,7 +201,7 @@ void ElephantChess::recomputeTargetPositionInfo()
 		{
 			if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
 			{
-				auto cp = node->getChessPositoin(x, y);
+				auto cp = &node->board[y][x];
 				if (cp->chess->type == None)
 				{
 					target->moveableList.push_back(cp);
@@ -227,7 +231,7 @@ void GuardChess::recomputeTargetPositionInfo()
 		int yMax = yMin + 3;
 		if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
 		{
-			auto cp = node->getChessPositoin(x, y);
+			auto cp = &node->board[y][x];
 			if (cp->chess->type == None)
 			{
 				target->moveableList.push_back(cp);
@@ -256,7 +260,7 @@ void KingChess::recomputeTargetPositionInfo()
 		int yMax = yMin + 3;
 		if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
 		{
-			auto cp = node->getChessPositoin(x, y);
+			auto cp = &node->board[y][x];
 			if (cp->chess->type == None)
 			{
 				target->moveableList.push_back(cp);

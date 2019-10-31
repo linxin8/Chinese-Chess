@@ -1,4 +1,59 @@
-#pragma once 
+#pragma once  
+
+class Chess;
+struct ChessPosition
+{
+	ChessPosition() :x(-1), y(-1), chess(nullptr) {}
+	ChessPosition(int x, int y, Chess* chess) :x(x), y(y), chess(chess) {}
+	ChessPosition(const ChessPosition& r) :x(r.x), y(r.y), chess(r.chess) {}
+	ChessPosition& operator=(const ChessPosition& r) { *const_cast<int*>(&this->x) = r.x; *const_cast<int*>(&this->y) = r.y; this->chess = r.chess; return *this; }
+	const int x;
+	const int y;
+	Chess* chess;
+};
+
+
+enum ChessType : char
+{
+	None,
+	Pawn,
+	Cannon,
+	Rook,
+	Knight,
+	Elephant,
+	Guard,
+	King
+};
+
+enum ChessCountry : char
+{
+	Black,
+	Red
+};
+
+struct ChessPosition;
+struct ChessTarget
+{
+	struct
+	{
+		ChessPosition* position[17]{};
+		int length = 0;
+		void push_back(ChessPosition* c) { position[length++] = c; }
+	}moveableList;
+	struct
+	{
+		ChessPosition* position[8]{};
+		int length = 0;
+		void push_back(ChessPosition* c) { position[length++] = c; }
+	}assaultableList;
+	struct
+	{
+		ChessPosition* position[8]{};
+		int length = 0;
+		void push_back(ChessPosition* c) { position[length++] = c; }
+	}defendableList;
+	void clear() { moveableList.length = 0; assaultableList.length = 0; defendableList.length = 0; }
+};
 
 struct Position
 {
@@ -6,13 +61,13 @@ struct Position
 	int y;
 	constexpr Position(int x, int y) :x(x), y(y) {}
 };
- 
 
-// [min,max)
-inline bool isInRange(int value,int min, int max)
+struct Action
 {
-	return min <= value && value < max;
-}
+	struct ChessPosition* from = nullptr;
+	struct ChessPosition* des = nullptr;
+	ChessType coveredChessType;
+}; 
 
 template<typename T, int N>
 struct SimpleList
@@ -24,8 +79,10 @@ struct SimpleList
 	T& front()const { return data[0]; }
 	T& back()const { return data[length - 1]; }
 	T& operator[](int i)const { return data[i]; }
+	T& operator[](int i){ return data[i]; }
 	T* begin() { return data; };
 	T* end() { return data + length; };
 	const T* begin()const { return data; };
 	const T* end()const { return data + length; };
 };
+

@@ -3,50 +3,9 @@
 #include"debug.h"
 #include"common.h"
 
-enum ChessType : char
-{
-	None,
-	Pawn,
-	Cannon,
-	Rook,
-	Knight,
-	Elephant,
-	Guard,
-	King
-};
-
-enum ChessCountry : char
-{
-	Black,
-	Red
-};
-
-struct ChessPosition;
-struct ChessTarget
-{
-	struct 
-	{
-		ChessPosition* position[17]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; } 
-	}moveableList;
-	struct
-	{
-		ChessPosition* position[8]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; }
-	}assaultableList;
-	struct
-	{
-		ChessPosition* position[8]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; }
-	}defendableList;
-	void clear() { moveableList.length = 0; assaultableList.length = 0; defendableList.length = 0; }
-};
 
 class Chess
-{
+{ 
 public:
 	static Chess* newInstance(class Node* node, int x, int y, ChessType type, ChessCountry country);
 public:
@@ -74,6 +33,7 @@ private:
 	void updateTarget();
 	void sortAssaultableTarget();
 protected:
+	//bool isInRange(int value, int min, int max) { return min <= value && value < max; }// [min,max)
 	virtual void recomputeTargetPositionInfo() = 0;
 public: 
 	ChessType type;

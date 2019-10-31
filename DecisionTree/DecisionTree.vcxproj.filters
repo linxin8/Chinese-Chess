@@ -39,6 +39,9 @@
     <ClInclude Include="hash.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="trick.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllfunction.cpp">
@@ -60,6 +63,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="chessPosition.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="hash.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,15 +1,9 @@
-#pragma once
-#include"node.h"
+#pragma once 
 #include<stack>
 #include<map>
-#include<unordered_map>
-
-struct Action
-{
-	ChessPosition* from; 
-	ChessPosition* des;
-	ChessType coveredChessType;
-};
+#include<unordered_map>  
+#include"node.h"  
+#include"hash.h"
 
 class Tree
 {
@@ -19,9 +13,9 @@ public:
 public:
 	struct Decision* deepSearch();
 private:
-	struct Decision* deepSearch(int level);
-	int deepSearchMax(int level, int alpha, int beta);
-	int deepSearchMin(int level, int alpha, int beta);
+	struct Decision* deepSearch(int depth);
+	int deepSearchMax(int depth, int alpha, int beta);
+	int deepSearchMin(int depth, int alpha, int beta);
 	void doAction(const Action& action);
 	void undoAction();
 public:
@@ -30,26 +24,28 @@ private:
 	void updateTime();
 	void debugPrintAction()const;
 	int getEstimatedValue();
-	void calculateActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
+	void appendActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
  private: 
 	Node root; 
-	std::stack<Action> actionStack;
-	std::stack<int> nodeValueStack;
+	std::stack<Action> actionStack; 
 	int maxThinkTime = 10;
 	int minThinkTime = 5;
 	bool timeOver;
 	int timeCheckCount = 100;
 	time_t lastTime; 
-	int deepMax = 10;
-	int deepCurrent = 0;
-	int maxDeepLast = 0;
-	int rootHashValue; 
-	static std::unordered_map<int, int> rootHashMap[17][17];
+	int depthMax = 5;
+	int depthCurrent = 0;
+	int depthMaxLast = 0;
+	HashKeyType rootHashValue;
+	static std::unordered_map<HashKeyType, int> rootHashMap[17][17];
 	std::vector<Chess*> aiChessCandidate;
 	std::vector<Chess*> playerChessCandidate;
 	int aiChessCount;
 	int playerChessCount; 
 	Chess* aiKingChess;
-	Chess* playerKingChess;   
+	Chess* playerKingChess;
+	static SearchResultHash aiResultHash;
+	static SearchResultHash playerResultHash;
 };
 
+ 

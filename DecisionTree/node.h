@@ -1,6 +1,5 @@
 #pragma once 
-#include"chess.h"
-#include"chessPosition.h"
+#include"chess.h" 
 #include<vector>
 
 class Node
@@ -16,10 +15,9 @@ public:
 	//std::list<ChessPosition*> getTargetChessPosition(ChessPosition* cp); 
 	void SetChess(int x, int y, Chess* chess) { board[y][x].chess = chess; }
 	ChessPosition* getChessPositoin(int x, int y) { return &board[y][x]; }
-
+	static ChessPosition board[10][9]; 
 private:
 	void debugPrintBoard()const; 
 private:
-	ChessPosition board[10][9]; 
 };
 

@@ -123,6 +123,7 @@
     <ClInclude Include="hash.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="tree.h" />
+    <ClInclude Include="trick.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chess.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="common.cpp" />
     <ClCompile Include="dllfunction.cpp" />
     <ClCompile Include="debug.cpp" />
+    <ClCompile Include="hash.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="tree.cpp" />
   </ItemGroup>

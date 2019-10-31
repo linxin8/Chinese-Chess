@@ -4,6 +4,7 @@
 #include<iostream>
 #include<cstdlib>
 
+ChessPosition Node::board[10][9];
 
 Node::Node(int state[10][9])
 {
@@ -31,8 +32,8 @@ void Node::loadBoard(int state[10][9])
 int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate)
 {
 	//None,Pawn,Cannon,Rook,Knight,Elephant,Guard,King
-	constexpr static int chessValue[8] = { 0,400,1500,2500,1500,500,500,/*100000000*/ 0 };
-	constexpr static int moveValue[8] = { 0,5,10,5,5,5,5,0 };
+	constexpr static int chessValue[8] = { 0,200,1500,2500,1500,500,500,/*100000000*/ 0 };
+	constexpr static int moveValue[8] = { 0,0,0,5,5,0,0,0 };
 	constexpr static int positionValue[2][8][10][9] =
 	{
 	{//black chess
@@ -61,19 +62,19 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 			{ 180, 240, 310, 390, 480, 390, 310, 240, 180},
 		},
 		{// Cannon
-			{  80,  80,  80, 100,  80, 100,  80,  80,  80},
-			{  20,  30,  30,  80, 200,  80,  30,  30,  20},
-			{  20,  30,  40, 100, 200, 100,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  30,  80, 200,  80,  30,  30,  20},
-			{ 200, 200, 200,  80,  80,  80, 200, 200, 200},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  80,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{ 100, 100, 100,  80,  80,  80, 100, 100, 100},
 		},
 		{// Rook
-			{- 50,  20,  20, 100, 100, 100,  20,  20, -50},
+			{-50,  20,  20, 100, 100, 100,  20,  20, -50},
 			{  20,  30,  30, 100, 100, 100,  30,  30,  20},
 			{  20,  30,  40, 100, 100, 100,  40,  30,  20},
 			{  20,  30,  40, 100, 100, 100,  40,  30,  20},
@@ -159,16 +160,17 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 			{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		},
 		{// Cannon
-			{ 200, 200, 200,  80,  80,  80, 200, 200, 200},
-			{  20,  30,  30,  80, 200,  80,  30,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40,  80, 200,  80,  40,  30,  20},
-			{  20,  30,  40, 100, 200, 100,  40,  30,  20},
-			{  20,  30,  30,  80, 200,  80,  30,  30,  20},
-			{  80,  80,  80, 100,  80, 100,  80,  80,  80},
+
+			{ 100, 100, 100,  80,  80,  80, 100, 100, 100},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  80,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+			{  20,  30,  30,  40,  40,  40,  30,  30,  20},
 		},
 		{// Rook
 			{ 100,  20,  20, 100, 100, 100,  20,  20, 100},
@@ -232,41 +234,114 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 		},
 	},
 	};
-	int totalValue = 0; 
-	for (auto chess : aiCandidate)
+	int totalValue = 0;
+	int defendMap[10][9]{};
+	SimpleList<ChessTarget*, 100> aiTarget;
+	SimpleList<ChessTarget*, 100> playerTarget;
+	for (auto& chess : aiCandidate)
 	{
 		auto type = chess->type;
 		if (type != None)
-		{ 
-			int value = 0;
-			auto target = chess->getTarget();
-			auto& assaultableList = target->assaultableList;
-			for (int i = 0; i < assaultableList.length; i++)
-			{
-				value += chessValue[assaultableList.position[i]->chess->type] >> 2;
-			}
-			value += positionValue[Black][type][chess->getY()][chess->getX()];
-			value += chessValue[type];
-			totalValue += value; 
+		{
+			aiTarget.push_back(chess->getTarget());
+			totalValue += positionValue[Black][type][chess->getY()][chess->getX()];
+			totalValue += chessValue[type];
 		}
-	} 
-	for (auto chess : playerCandidate)
+	}
+	for (auto& chess : playerCandidate)
 	{
 		auto type = chess->type;
 		if (type != None)
-		{ 
-			int value = 0;
-			auto target = chess->getTarget();
-			auto& assaultableList = target->assaultableList;
-			for (int i = 0; i < assaultableList.length; i++)
-			{
-				value += chessValue[assaultableList.position[i]->chess->type] >> 2;
-			}
-			value += positionValue[Black][type][chess->getY()][chess->getX()];
-			value += chessValue[type];
-			totalValue -= value; 
+		{
+			playerTarget.push_back(chess->getTarget());
+			totalValue -= positionValue[Red][type][chess->getY()][chess->getX()];
+			totalValue -= chessValue[type];
 		}
-	} 
+	}
+
+	for (auto& target : aiTarget)
+	{
+		for (int i = 0; i < target->defendableList.length; i++)
+		{
+			auto& p = target->defendableList.position[i];
+			defendMap[p->y][p->x] += 1;
+		}
+	}
+
+	for (auto& target : playerTarget)
+	{
+		for (int i = 0; i < target->defendableList.length; i++)
+		{
+			auto& p = target->defendableList.position[i];
+			defendMap[p->y][p->x] += 1;
+		}
+	}
+	for (auto& target : aiTarget)
+	{ 
+		for (int i = 0; i < target->assaultableList.length; i++)
+		{
+			auto& p = target->assaultableList.position[i];
+			auto v = defendMap[p->y][p->x];
+			if (v == 0)
+			{
+				totalValue += chessValue[p->chess->type] >> 1;
+			}
+			else
+			{
+				totalValue += chessValue[p->chess->type] / (2 + v);
+			} 
+		} 
+	}
+	for (auto& target : playerTarget)
+	{ 
+		for (int i = 0; i < target->assaultableList.length; i++)
+		{
+			auto& p = target->assaultableList.position[i]; 
+			auto v = defendMap[p->y][p->x];
+			if (v == 0)
+			{
+				totalValue -= chessValue[p->chess->type] >> 1;
+			}
+			else
+			{
+				totalValue -= chessValue[p->chess->type] / (2 + v);
+			}
+		} 
+	}  
+	//for (auto chess : aiCandidate)
+	//{
+	//	auto type = chess->type;
+	//	if (type != None)
+	//	{ 
+	//		int value = 0;
+	//		auto target = chess->getTarget();
+	//		auto& assaultableList = target->assaultableList;
+	//		for (int i = 0; i < assaultableList.length; i++)
+	//		{
+	//			value += chessValue[assaultableList.position[i]->chess->type] >> 2;
+	//		}
+	//		value += positionValue[Black][type][chess->getY()][chess->getX()];
+	//		value += chessValue[type];
+	//		totalValue += value; 
+	//	}
+	//} 
+	//for (auto chess : playerCandidate)
+	//{
+	//	auto type = chess->type;
+	//	if (type != None)
+	//	{ 
+	//		int value = 0;
+	//		auto target = chess->getTarget();
+	//		auto& assaultableList = target->assaultableList;
+	//		for (int i = 0; i < assaultableList.length; i++)
+	//		{
+	//			value += chessValue[assaultableList.position[i]->chess->type] >> 2;
+	//		}
+	//		value += positionValue[Black][type][chess->getY()][chess->getX()];
+	//		value += chessValue[type];
+	//		totalValue -= value; 
+	//	}
+	//} 
 	return totalValue;
 }
 
