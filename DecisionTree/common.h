@@ -1,15 +1,54 @@
-#pragma once  
+#pragma once   
+
+template<typename T, int N>
+struct SimpleList
+{
+	T data[N];
+	int length = 0;
+	void push_back(const T& r) { data[length++] = r; }
+	void pop_back() { length--; }
+	T& front()const { return data[0]; }
+	T& back()const { return data[length - 1]; }
+	T& operator[](int i)const { return data[i]; }
+	T& operator[](int i) { return data[i]; }
+	T* begin() { return data; };
+	T* end() { return data + length; };
+	const T* begin()const { return data; };
+	const T* end()const { return data + length; };
+	bool empty()const { return length == 0; }
+	void clear() { length = 0; }
+};
 
 class Chess;
 struct ChessPosition
 {
 	ChessPosition() :x(-1), y(-1), chess(nullptr) {}
 	ChessPosition(int x, int y, Chess* chess) :x(x), y(y), chess(chess) {}
-	ChessPosition(const ChessPosition& r) :x(r.x), y(r.y), chess(r.chess) {}
-	ChessPosition& operator=(const ChessPosition& r) { *const_cast<int*>(&this->x) = r.x; *const_cast<int*>(&this->y) = r.y; this->chess = r.chess; return *this; }
-	const int x;
-	const int y;
+	ChessPosition(const ChessPosition& r) :x(r.x), y(r.y), chess(r.chess) {} 
+	int x;
+	int y;
 	Chess* chess;
+	ChessPosition* up;
+	ChessPosition* left;
+	ChessPosition* down;
+	ChessPosition* right; 
+	struct
+	{
+		SimpleList<ChessPosition*, 3> blackCandidate;
+		SimpleList<ChessPosition*, 3> redCandidate;
+	}pawnCandidate; 
+	struct
+	{
+		SimpleList<ChessPosition*, 8> candidate;
+		SimpleList<ChessPosition*, 8> handicap;
+	}knightCandidate;	
+	struct
+	{
+		SimpleList<ChessPosition*, 8> candidate;
+		SimpleList<ChessPosition*, 8> handicap;
+	}elephantCandidate;
+	SimpleList<ChessPosition*, 4> guardCandidate;
+	SimpleList<ChessPosition*, 4> kingCandidate; 
 };
 
 
@@ -69,20 +108,4 @@ struct Action
 	ChessType coveredChessType;
 }; 
 
-template<typename T, int N>
-struct SimpleList
-{
-	T data[N];
-	int length = 0;
-	void push_back(const T& r) { data[length++] = r; }
-	int pop_back() { length--; }
-	T& front()const { return data[0]; }
-	T& back()const { return data[length - 1]; }
-	T& operator[](int i)const { return data[i]; }
-	T& operator[](int i){ return data[i]; }
-	T* begin() { return data; };
-	T* end() { return data + length; };
-	const T* begin()const { return data; };
-	const T* end()const { return data + length; };
-};
 

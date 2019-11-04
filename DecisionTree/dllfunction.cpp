@@ -1,8 +1,7 @@
 #include <iostream>
 #include "dllfunction.h"
 #include "tree.h"
-
-int test[2] = { 2,3, };
+ 
 const char* getName()
 {
 	return  "tree decision dll";

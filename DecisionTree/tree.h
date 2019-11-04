@@ -13,9 +13,11 @@ public:
 public:
 	struct Decision* deepSearch();
 private:
-	struct Decision* deepSearch(int depth);
+	Action deepSearch(int depth);
 	int deepSearchMax(int depth, int alpha, int beta);
 	int deepSearchMin(int depth, int alpha, int beta);
+	int quiescentMax(int alpha, int beta);
+	int quiescentMin(int alpha, int beta);
 	void doAction(const Action& action);
 	void undoAction();
 public:
@@ -25,15 +27,15 @@ private:
 	void debugPrintAction()const;
 	int getEstimatedValue();
 	void appendActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
+	void appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
  private: 
 	Node root; 
 	std::stack<Action> actionStack; 
-	int maxThinkTime = 10;
-	int minThinkTime = 5;
+	int maxThinkTime = 3;
+	int minThinkTime = 2;
 	bool timeOver;
 	int timeCheckCount = 100;
-	time_t lastTime; 
-	int depthMax = 5;
+	time_t lastTime;  
 	int depthCurrent = 0;
 	int depthMaxLast = 0;
 	HashKeyType rootHashValue;
@@ -46,6 +48,9 @@ private:
 	Chess* playerKingChess;
 	static SearchResultHash aiResultHash;
 	static SearchResultHash playerResultHash;
-};
-
- 
+	static const int maximumValue;
+	static const int minimumValue;
+	static SimpleList<HashKeyType, 200> situationHistory;
+	bool checkIsCurrentSituationRepeated()const;
+	HashKeyType peekRootHashValue(const Action& action);
+}; 

@@ -6,6 +6,7 @@
 
 
 #define isInRange(value,min,max) (min <= value && value < max)
+#define try_push()
 
 Chess* Chess::newInstance(Node* node, int x, int y, ChessType type, ChessCountry country)
 {
@@ -50,137 +51,234 @@ void Chess::sortAssaultableTarget()
 const Position PawnChess::relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
 void PawnChess::recomputeTargetPositionInfo()
 { 
-	constexpr const Position relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
-	int x;
-	int y;
-	for (auto& i : relativePosition)
+	//constexpr const Position relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
+	//int x;
+	//int y;
+	//for (auto& i : relativePosition)
+	//{
+	//	if (country == Black)
+	//	{
+	//		if (i.y < 0 || (i.x != 0 && py <= 4))
+	//		{
+	//			continue;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (i.y > 0 || (i.x != 0 && py >= 5))
+	//		{
+	//			continue;
+	//		}
+	//	}
+	//	x = px + i.x;
+	//	y = py + i.y;
+	//	if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
+	//	{
+	//		auto cp = &node->board[y][x];
+	//		if (cp->chess->type==None)
+	//		{
+	//			target->moveableList.push_back(cp);
+	//		}
+	//		else if (cp->chess->country!=country)
+	//		{
+	//			target->assaultableList.push_back(cp);
+	//		}
+	//		else
+	//		{
+	//			target->defendableList.push_back(cp);
+	//		}
+	//	}
+	//} 
+
+	auto& candidate = country == Black ? cp->pawnCandidate.blackCandidate : cp->pawnCandidate.redCandidate;
+	for (auto& i : candidate)
 	{
-		if (country == Black)
+		if (i->chess->type == None)
 		{
-			if (i.y < 0 || (i.x != 0 && py <= 4))
-			{
-				continue;
-			}
+			target->moveableList.push_back(i);
+		}
+		else if (i->chess->country != country)
+		{
+			target->assaultableList.push_back(i);
 		}
 		else
 		{
-			if (i.y > 0 || (i.x != 0 && py >= 5))
-			{
-				continue;
-			}
+			target->defendableList.push_back(i);
 		}
-		x = px + i.x;
-		y = py + i.y;
-		if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
-		{
-			auto cp = &node->board[y][x];
-			if (cp->chess->type==None)
-			{
-				target->moveableList.push_back(cp);
-			}
-			else if (cp->chess->country!=country)
-			{
-				target->assaultableList.push_back(cp);
-			}
-			else
-			{
-				target->defendableList.push_back(cp);
-			}
-		}
-	}
+	} 
 }
 
 const Position CannonChess::relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
 void CannonChess::recomputeTargetPositionInfo()
 {
-	constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
-	for (auto& v : relativePosition)
-	{
-		for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
-		{
-			auto cp = &node->board[y][x];
-			if (cp->chess->type == None)
-			{
-				target->moveableList.push_back(cp);
-			}
-			else
-			{
-				for (x += v.x, y += v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
-				{
-					cp = &node->board[y][x];
-					if (cp->chess->type != None)
-					{ 
-						if (cp->chess->country != country)
-						{
-							target->assaultableList.push_back(cp);
-							break;
-						}
-						else
-						{
-							target->defendableList.push_back(cp);
-							break;
-						}
-					}
-				}
-				break;
-			}
-		}
+	//constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
+	//for (auto& v : relativePosition)
+	//{
+	//	for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
+	//	{
+	//		auto cp = &node->board[y][x];
+	//		if (cp->chess->type == None)
+	//		{
+	//			target->moveableList.push_back(cp);
+	//		}
+	//		else
+	//		{
+	//			for (x += v.x, y += v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
+	//			{
+	//				cp = &node->board[y][x];
+	//				if (cp->chess->type != None)
+	//				{ 
+	//					if (cp->chess->country != country)
+	//					{
+	//						target->assaultableList.push_back(cp);
+	//						break;
+	//					}
+	//					else
+	//					{
+	//						target->defendableList.push_back(cp);
+	//						break;
+	//					}
+	//				}
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}  
+
+	ChessPosition* temp;
+#define TEMP_MARCO(direction)\
+	for (temp = cp->direction; temp != nullptr; temp = temp->direction)\
+	{\
+		if (temp->chess->type == None)\
+		{\
+			target->moveableList.push_back(temp);\
+		}\
+		else\
+		{\
+			for (temp = temp->direction; temp != nullptr; temp = temp->direction)\
+			{\
+				if (temp->chess->type != None)\
+				{\
+					if (temp->chess->country != country)\
+					{\
+						target->assaultableList.push_back(temp);\
+						break;\
+					}\
+					else\
+					{\
+						target->defendableList.push_back(temp);\
+						break;\
+					}\
+				}\
+			}\
+			break;\
+		}\
 	}
+	TEMP_MARCO(up);
+	TEMP_MARCO(down);
+	TEMP_MARCO(left);
+	TEMP_MARCO(right);
+#undef TEMP_MARCO
 }
 
 const Position RookChess::relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
 void RookChess::recomputeTargetPositionInfo()
 { 
-	constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
-	for (auto& v : relativePosition)
-	{
-		for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
-		{
-			auto cp = &node->board[y][x];
-			if (cp->chess->type==None)
-			{
-				target->moveableList.push_back(cp);
-			}
-			else if (cp->chess->country!=country)
-			{
-				target->assaultableList.push_back(cp);
-				break;
-			}
-			else
-			{
-				target->defendableList.push_back(cp);
-				break;
-			}
-		}
+	//constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
+	//for (auto& v : relativePosition)
+	//{
+	//	for (int x = px + v.x, y = py + v.y; isInRange(x, 0, 9) && isInRange(y, 0, 10); x += v.x, y += v.y)
+	//	{
+	//		auto cp = &node->board[y][x];
+	//		if (cp->chess->type==None)
+	//		{
+	//			target->moveableList.push_back(cp);
+	//		}
+	//		else if (cp->chess->country!=country)
+	//		{
+	//			target->assaultableList.push_back(cp);
+	//			break;
+	//		}
+	//		else
+	//		{
+	//			target->defendableList.push_back(cp);
+	//			break;
+	//		}
+	//	}
+	//}
+
+	ChessPosition* temp; 
+#define  TEMP_MARCO(direction) \
+	for (temp = cp->direction; temp != nullptr; temp = temp->direction) \
+	{\
+		if (temp->chess->type == None)\
+		{\
+			target->moveableList.push_back(temp);\
+		}\
+		else if (temp->chess->country != country)\
+		{\
+			target->assaultableList.push_back(temp);\
+			break;\
+		}\
+		else\
+		{\
+			target->defendableList.push_back(temp);\
+			break;\
+		}\
 	}
+	TEMP_MARCO(up);
+	TEMP_MARCO(down);
+	TEMP_MARCO(left);
+	TEMP_MARCO(right);
+#undef TEMP_MARCO
 } 
 
 const Position KnightChess::relativePosition[8]{ {2,1},{2,-1},{-2,1},{-2,-1},{1,2},{1,-2},{-1,2},{-1,-2} };
 void KnightChess::recomputeTargetPositionInfo()
 {
-	constexpr const Position relativePosition[8] = { {2,1},{2,-1},{-2,1},{-2,-1},{1,2},{1,-2},{-1,2},{-1,-2} };
-	constexpr const Position hv[8] = { {1,0},{1,0},{-1,0},{-1,0},{0,1},{0,-1},{0,1},{0,-1} };
-	for (int i = 0; i < 8; i++)
+	//constexpr const Position relativePosition[8] = { {2,1},{2,-1},{-2,1},{-2,-1},{1,2},{1,-2},{-1,2},{-1,-2} };
+	//constexpr const Position hv[8] = { {1,0},{1,0},{-1,0},{-1,0},{0,1},{0,-1},{0,1},{0,-1} };
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	int x = px + relativePosition[i].x;
+	//	int y = py + relativePosition[i].y;
+	//	if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
+	//	{
+	//		if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
+	//		{ 
+	//			auto cp = &node->board[y][x];
+	//			if (cp->chess->type == None)
+	//			{
+	//				target->moveableList.push_back(cp);
+	//			}
+	//			else if (cp->chess->country!=country)
+	//			{
+	//				target->assaultableList.push_back(cp);
+	//			}
+	//			else
+	//			{
+	//				target->defendableList.push_back(cp);
+	//			}
+	//		}
+	//	}
+	//} 
+	for (int i = 0; i < cp->knightCandidate.candidate.length; i++)
 	{
-		int x = px + relativePosition[i].x;
-		int y = py + relativePosition[i].y;
-		if (isInRange(x, 0, 9) && isInRange(y, 0, 10))
+		auto& candidate = cp->knightCandidate.candidate[i];
+		auto& handicap = cp->knightCandidate.handicap[i];
+		if (handicap->chess->type == None)
 		{
-			if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
-			{ 
-				auto cp = &node->board[y][x];
-				if (cp->chess->type == None)
-				{
-					target->moveableList.push_back(cp);
-				}
-				else if (cp->chess->country!=country)
-				{
-					target->assaultableList.push_back(cp);
-				}
-				else
-				{
-					target->defendableList.push_back(cp);
-				}
+			if (candidate->chess->type == None)
+			{
+				target->moveableList.push_back(candidate);
+			}
+			else if (candidate->chess->country != country)
+			{
+				target->assaultableList.push_back(candidate);
+			}
+			else
+			{
+				target->defendableList.push_back(candidate);
 			}
 		}
 	}
@@ -189,31 +287,51 @@ void KnightChess::recomputeTargetPositionInfo()
 const Position ElephantChess::relativePosition[4]{ {2,2},{2,-2},{-2,2},{-2,-2} };
 void ElephantChess::recomputeTargetPositionInfo()
 {
-	constexpr const Position relativePosition[4] = { {2,2},{2,-2},{-2,2},{-2,-2} };
-	constexpr const Position hv[4] = { {1,1},{1,-1},{-1,1},{-1,-1} };
-	for (int i = 0; i < 4; i++)
+	//constexpr const Position relativePosition[4] = { {2,2},{2,-2},{-2,2},{-2,-2} };
+	//constexpr const Position hv[4] = { {1,1},{1,-1},{-1,1},{-1,-1} };
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	int x = px + relativePosition[i].x;
+	//	int y = py + relativePosition[i].y;
+	//	int yMin = country == Black ? 0 : 5;
+	//	int yMax = yMin + 5;
+	//	if (isInRange(x, 0, 9) && isInRange(y, yMin, yMax))
+	//	{
+	//		if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
+	//		{
+	//			auto cp = &node->board[y][x];
+	//			if (cp->chess->type == None)
+	//			{
+	//				target->moveableList.push_back(cp);
+	//			}
+	//			else if (cp->chess->country!=country)
+	//			{
+	//				target->assaultableList.push_back(cp);
+	//			}
+	//			else
+	//			{
+	//				target->defendableList.push_back(cp);
+	//			}
+	//		}
+	//	}
+	//}
+	for (int i = 0; i < cp->elephantCandidate.candidate.length; i++)
 	{
-		int x = px + relativePosition[i].x;
-		int y = py + relativePosition[i].y;
-		int yMin = country == Black ? 0 : 5;
-		int yMax = yMin + 5;
-		if (isInRange(x, 0, 9) && isInRange(y, yMin, yMax))
+		auto& candidate = cp->elephantCandidate.candidate[i];
+		auto& handicap = cp->elephantCandidate.handicap[i];
+		if (handicap->chess->type == None)
 		{
-			if (node->isNoneChess(px + hv[i].x, py + hv[i].y))
+			if (candidate->chess->type == None)
 			{
-				auto cp = &node->board[y][x];
-				if (cp->chess->type == None)
-				{
-					target->moveableList.push_back(cp);
-				}
-				else if (cp->chess->country!=country)
-				{
-					target->assaultableList.push_back(cp);
-				}
-				else
-				{
-					target->defendableList.push_back(cp);
-				}
+				target->moveableList.push_back(candidate);
+			}
+			else if (candidate->chess->country != country)
+			{
+				target->assaultableList.push_back(candidate);
+			}
+			else
+			{
+				target->defendableList.push_back(candidate);
 			}
 		}
 	}
@@ -222,28 +340,43 @@ void ElephantChess::recomputeTargetPositionInfo()
 const Position GuardChess::relativePosition[4]{ {1,1},{1,-1},{-1,1},{-1,-1} };
 void GuardChess::recomputeTargetPositionInfo()
 {
-	constexpr const Position relativePosition[4] = { {1,1},{1,-1},{-1,1},{-1,-1} };
-	for (int i = 0; i < 4; i++)
+	//constexpr const Position relativePosition[4] = { {1,1},{1,-1},{-1,1},{-1,-1} };
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	int x = px + relativePosition[i].x;
+	//	int y = py + relativePosition[i].y;
+	//	int yMin = country == Black ? 0 : 7;
+	//	int yMax = yMin + 3;
+	//	if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
+	//	{
+	//		auto cp = &node->board[y][x];
+	//		if (cp->chess->type == None)
+	//		{
+	//			target->moveableList.push_back(cp);
+	//		}
+	//		else if (cp->chess->country!=country)
+	//		{
+	//			target->assaultableList.push_back(cp);
+	//		}
+	//		else
+	//		{
+	//			target->defendableList.push_back(cp);
+	//		}
+	//	}
+	//} 
+	for (auto& i : cp->guardCandidate)
 	{
-		int x = px + relativePosition[i].x;
-		int y = py + relativePosition[i].y;
-		int yMin = country == Black ? 0 : 7;
-		int yMax = yMin + 3;
-		if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
+		if (i->chess->type == None)
 		{
-			auto cp = &node->board[y][x];
-			if (cp->chess->type == None)
-			{
-				target->moveableList.push_back(cp);
-			}
-			else if (cp->chess->country!=country)
-			{
-				target->assaultableList.push_back(cp);
-			}
-			else
-			{
-				target->defendableList.push_back(cp);
-			}
+			target->moveableList.push_back(i);
+		}
+		else if (i->chess->country != country)
+		{
+			target->assaultableList.push_back(i);
+		}
+		else
+		{
+			target->defendableList.push_back(i);
 		}
 	}
 }
@@ -251,28 +384,70 @@ void GuardChess::recomputeTargetPositionInfo()
 const Position KingChess::relativePosition[4]{ {1,1},{1,-1},{-1,1},{-1,-1} };
 void KingChess::recomputeTargetPositionInfo()
 {
-	constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
-	for (int i = 0; i < 4; i++)
+	//constexpr const Position relativePosition[4] = { {1,0},{-1,0},{0,-1},{0,1} };
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	int x = px + relativePosition[i].x;
+	//	int y = py + relativePosition[i].y;
+	//	int yMin = country == Black ? 0 : 7;
+	//	int yMax = yMin + 3;
+	//	if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
+	//	{
+	//		auto cp = &node->board[y][x];
+	//		if (cp->chess->type == None)
+	//		{
+	//			target->moveableList.push_back(cp);
+	//		}
+	//		else if (cp->chess->country!=country)
+	//		{
+	//			target->assaultableList.push_back(cp);
+	//		}
+	//		else
+	//		{
+	//			target->defendableList.push_back(cp);
+	//		}
+	//	}
+	//}
+	for (auto& i : cp->kingCandidate)
 	{
-		int x = px + relativePosition[i].x;
-		int y = py + relativePosition[i].y;
-		int yMin = country == Black ? 0 : 7;
-		int yMax = yMin + 3;
-		if (isInRange(x, 3, 6) && isInRange(y, yMin, yMax))
+		if (i->chess->type == None)
 		{
-			auto cp = &node->board[y][x];
-			if (cp->chess->type == None)
-			{
-				target->moveableList.push_back(cp);
-			}
-			else if (cp->chess->country!=country)
-			{
-				target->assaultableList.push_back(cp);
-			}
-			else
-			{
-				target->defendableList.push_back(cp);
-			}
+			target->moveableList.push_back(i);
+		}
+		else if (i->chess->country != country)
+		{
+			target->assaultableList.push_back(i);
+		}
+		else
+		{
+			target->defendableList.push_back(i);
+		}
+	}
+	ChessPosition* temp;
+	for (temp = cp->up; temp != nullptr; temp = temp->up)
+	{
+		auto t = temp->chess->type;
+		if (t == King)
+		{
+			target->assaultableList.push_back(temp);
+			break;
+		}
+		if (t != None)
+		{
+			break;
+		}
+	}
+	for (temp = cp->down; temp != nullptr; temp = temp->down)
+	{
+		auto t = temp->chess->type;
+		if (t == King)
+		{
+			target->assaultableList.push_back(temp);
+			break;
+		}
+		if (t != None)
+		{
+			break;
 		}
 	}
 }

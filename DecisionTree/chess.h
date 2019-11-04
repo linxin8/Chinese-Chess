@@ -38,6 +38,7 @@ protected:
 public: 
 	ChessType type;
 	ChessCountry country;
+	ChessPosition* cp;
 protected:
 	class Node* node; 
 	ChessTarget* target;

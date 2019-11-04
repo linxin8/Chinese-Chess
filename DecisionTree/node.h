@@ -19,5 +19,6 @@ public:
 private:
 	void debugPrintBoard()const; 
 private:
+	void initChessPosistion(int x,int y);
 };
 

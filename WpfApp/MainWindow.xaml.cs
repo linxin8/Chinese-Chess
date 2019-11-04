@@ -60,24 +60,50 @@ namespace ChessGame
             //     {00,00,00,00,00,00,00,00,00},
             //     {23,24,25,26,27,26,25,00,00}
             //};           
+            //var testMap = new int[10, 9]
+            //{
+            //     {13,14,15,16,17,16,15,14,13},
+            //     {00,00,00,00,00,00,00,00,00},
+            //     {00,12,00,00,00,00,00,12,00},
+            //     {11,00,11,00,11,00,11,00,11},
+            //     {00,00,00,00,00,00,00,00,00},
+            //     {00,00,00,00,00,00,00,00,00},
+            //     {21,00,21,00,21,00,21,00,21},
+            //     {00,22,00,00,00,00,00,22,00},
+            //     {00,00,00,00,00,00,00,00,00},
+            //     {23,24,25,26,27,26,25,24,23}
+            //};
             var testMap = new int[10, 9]
             {
                  {13,14,15,16,17,16,15,14,13},
                  {00,00,00,00,00,00,00,00,00},
-                 {00,12,00,00,12,00,00,00,00},
+                 {00,12,00,00,00,00,00,12,00},
                  {11,00,11,00,11,00,11,00,11},
                  {00,00,00,00,00,00,00,00,00},
+                 {00,00,00,00,00,00,21,00,00},
+                 {21,00,21,00,21,00,00,00,21},
+                 {00,22,00,00,00,00,00,22,00},
                  {00,00,00,00,00,00,00,00,00},
-                 {21,00,21,00,21,00,21,00,21},
-                 {00,22,00,00,22,00,24,00,00},
-                 {00,00,00,00,00,00,00,00,00},
-                 {23,24,25,26,27,26,25,00,23}
+                 {23,24,25,26,27,26,25,24,23}
             };
-            var version = DecisionTreeDll.GetVersion();
-            var name = DecisionTreeDll.GetName();
+            //var testMap = new int[10, 9] {
+            //     { 00,00,00,17,00,16,00,00,00},
+            //     { 00,00,00,00,16,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,13,00,00,00,00,00},
+            //     { 00,00,00,00,00,00,00,00,00},
+            //     { 00,00,00,00,27,00,00,00,00},
+            //};
+            //logicMap.LoadMap(testMap);
+            //var dllMap = logicMap.GetDLLMap();
+            //DecisionTreeDll.GetDecision(testMap, out DecisionTreeDllDecision decision);
+            //var version = DecisionTreeDll.GetVersion();
+            //var name = DecisionTreeDll.GetName();
             //var decision = new DecisionTreeDllDecision();
-            var dllMap = logicMap.GetDLLMap();
-            DecisionTreeDll.GetDecision(testMap, out DecisionTreeDllDecision decision);
             //Console.WriteLine($"{decision.fromX},{decision.fromY}->{decision.desX},{decision.desY}");
             //var positions=DecisionTreeDll.GetAccessiblePosition(logicMap.GetDLLMap(), 0, 0);
             //Console.WriteLine($"{positions.Count}");
