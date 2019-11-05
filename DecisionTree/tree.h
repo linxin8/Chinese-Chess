@@ -16,8 +16,11 @@ private:
 	Action deepSearch(int depth);
 	int deepSearchMax(int depth, int alpha, int beta);
 	int deepSearchMin(int depth, int alpha, int beta);
-	int quiescentMax(int alpha, int beta);
-	int quiescentMin(int alpha, int beta);
+	int quiescentMax(int alpha, int beta, int quiescentDepth = 0);
+	int quiescentMin(int alpha, int beta, int quiescentDepth = 0);
+	int quiescentMinWithDelta(int alpha, int beta, int standardValue);
+	int quiescentMaxWithDelta(int alpha, int beta, int standardValue);
+
 	void doAction(const Action& action);
 	void undoAction();
 public:
@@ -53,4 +56,8 @@ private:
 	static SimpleList<HashKeyType, 200> situationHistory;
 	bool checkIsCurrentSituationRepeated()const;
 	HashKeyType peekRootHashValue(const Action& action);
+	bool isKingSafe(ChessCountry country);
+	const int quiescentDelta = 500;
+	int quiescentDepthMax = 4;
+	int depthMax;
 }; 
