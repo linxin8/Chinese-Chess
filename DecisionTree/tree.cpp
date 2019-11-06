@@ -104,21 +104,24 @@ Decision* Tree::deepSearch()
 	timeOver = false;
 	Action lastBestAction;
 	int step = 2;
-	int stepIncrement = 2;
+	int stepIncrement = 2; 
+	maxThinkTime = 10;
+	bool getAction = false;
 	for (; step < 20; step += stepIncrement)
 	{
 		depthMaxLast = 0;
 		depthMax = step + 8;
 		lastTime = std::time(nullptr); 
-		quiescentDepthMax = 4;
+		quiescentDepthMax = 6;
 		std::cout << "try step: " << step << std::endl;
-		auto bestAction = deepSearch(step);
+		auto bestAction = deepSearch(step, getAction ? &lastBestAction : nullptr);
 		if (timeOver)
 		{
 			step -= stepIncrement;
 			break;
 		}
 		lastBestAction = bestAction;
+		getAction = true;
 		//auto diff = std::time(nullptr) - lastTime;
 		//if (diff >= minThinkTime)
 		//{
@@ -177,10 +180,22 @@ void Tree::appendActionCandidate(const std::vector<Chess*>& chessCandidate, Simp
 			}
 		}
 	}
-	 constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 5}; 
-	 std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(),
-		 [&chessPriority](Action& a, Action& b) {return chessPriority[a.coveredChessType] > chessPriority[b.coveredChessType]; });
- 
+	 //std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(),
+		//  [](Action& a, Action& b) 
+	 //{
+		// constexpr int chessValue[8] = { 0,200,1500,3500,1500,800,800,/*100000000*/ 0 };
+		// if (a.coveredChessType == None && b.coveredChessType == None)
+		// {
+		//	 return chessValue[a.from->chess->type] > chessValue[b.from->chess->type];
+		// }
+		// return chessValue[a.coveredChessType] - chessValue[a.from->chess->type] > chessValue[b.coveredChessType] - chessValue[b.from->chess->type];
+	 //});
+	 
+	std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(), [](Action&a, Action&b)
+	{
+		constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 10 };
+		return chessPriority[a.coveredChessType] > chessPriority[a.coveredChessType];
+	});
 }
 
  
@@ -188,6 +203,7 @@ void Tree::appendActionCandidate(const std::vector<Chess*>& chessCandidate, Simp
 void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
 {
 	Action actionTemp;
+	auto lengthLast = actionCandidate.length;
 	for (size_t i = 0; i < chessCandidate.size(); i++)
 	{
 		if (chessCandidate[i]->type != None)
@@ -202,9 +218,21 @@ void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCand
 			} 
 		}
 	}
-	constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 5 };
-	std::sort(actionCandidate.begin(), actionCandidate.end(),
-		[&chessPriority](Action& a, Action& b) {return chessPriority[a.coveredChessType] > chessPriority[b.coveredChessType]; });
+	//std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(),
+	//	[](Action& a, Action& b)
+	//{
+	//	constexpr int chessValue[8] = { 0,200,1500,3500,1500,800,800,/*100000000*/ 0 };
+	//	if (a.coveredChessType == None && b.coveredChessType == None)
+	//	{
+	//		return chessValue[a.from->chess->type] > chessValue[b.from->chess->type];
+	//	}
+	//	return chessValue[a.coveredChessType] - chessValue[a.from->chess->type] > chessValue[b.coveredChessType] - chessValue[b.from->chess->type];
+	//});
+	std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(), [](Action&a, Action&b)
+	{
+		constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 10 };
+		return chessPriority[a.coveredChessType] > chessPriority[a.coveredChessType];
+	});
 }
 
 bool Tree::checkIsCurrentSituationRepeated()const
@@ -244,7 +272,7 @@ bool Tree::isKingSafe(ChessCountry country)
 }
  
 
-Action Tree::deepSearch(int depthTotal)
+Action Tree::deepSearch(int depthTotal, Action* recommendAction)
 { 
 	Action bestAction{ nullptr,nullptr,None };
 	Position from(0,0);  
@@ -252,6 +280,10 @@ Action Tree::deepSearch(int depthTotal)
 	int beta = 20000000;
 
 	SimpleList<Action, 100> actionCandidate;
+	if (recommendAction != nullptr)
+	{
+		actionCandidate.push_back(*recommendAction);
+	}
 	appendActionCandidate(aiChessCandidate, actionCandidate);
 	int value = 0;
 	bool hasPVValue = false;

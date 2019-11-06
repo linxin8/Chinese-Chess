@@ -13,7 +13,7 @@ public:
 public:
 	struct Decision* deepSearch();
 private:
-	Action deepSearch(int depth);
+	Action deepSearch(int depth, Action* recommendAction = nullptr);
 	int deepSearchMax(int depth, int alpha, int beta);
 	int deepSearchMin(int depth, int alpha, int beta);
 	int quiescentMax(int alpha, int beta, int quiescentDepth = 0);

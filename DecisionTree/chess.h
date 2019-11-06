@@ -39,11 +39,11 @@ public:
 	ChessType type;
 	ChessCountry country;
 	ChessPosition* cp;
+	int px;
+	int py;
 protected:
 	class Node* node; 
 	ChessTarget* target;
-	int px;
-	int py;
 };
 
 class NoneChess :public Chess
