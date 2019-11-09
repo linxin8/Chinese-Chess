@@ -29,19 +29,17 @@ void getAccessiblePosition(int map[10][9], int x, int y, PositionList* positionL
 	DLL_init();
 	Tree tree(map);
 	auto target = tree.getTarget(x, y);
-	int length = 0;
-	auto& assaultableList = target->assaultableList;
-	for (int i = 0; i < assaultableList.length; i++)
-	{
-		positionList->x[length] = assaultableList.position[i]->x;
-		positionList->y[length] = assaultableList.position[i]->y;
+	int length = 0; 
+	for (auto& p : target->assaultableList)
+	{ 
+		positionList->x[length] = p->x;
+		positionList->y[length] = p->y;
 		length++;
-	}	
-	auto& moveableList = target->moveableList;
-	for (int i = 0; i < moveableList.length; i++)
+	} 
+	for (auto& p : target->moveableList)
 	{
-		positionList->x[length] = moveableList.position[i]->x;
-		positionList->y[length] = moveableList.position[i]->y;
+		positionList->x[length] = p->x;
+		positionList->y[length] = p->y;
 		length++;
 	}
 	positionList->length = length; 

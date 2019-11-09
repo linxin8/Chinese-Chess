@@ -72,26 +72,11 @@ enum ChessCountry : char
 
 struct ChessPosition;
 struct ChessTarget
-{
-	struct
-	{
-		ChessPosition* position[17]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; }
-	}moveableList;
-	struct
-	{
-		ChessPosition* position[8]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; }
-	}assaultableList;
-	struct
-	{
-		ChessPosition* position[8]{};
-		int length = 0;
-		void push_back(ChessPosition* c) { position[length++] = c; }
-	}defendableList;
-	void clear() { moveableList.length = 0; assaultableList.length = 0; defendableList.length = 0; }
+{ 
+	SimpleList<ChessPosition*, 17> moveableList; 
+	SimpleList<ChessPosition*, 8> assaultableList; 
+	SimpleList<ChessPosition*, 8> defendableList;
+	void clear() { moveableList.clear(); assaultableList.clear(); defendableList.clear(); }
 };
 
 struct Position

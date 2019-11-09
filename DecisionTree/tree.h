@@ -57,7 +57,7 @@ private:
 	bool checkIsCurrentSituationRepeated()const;
 	HashKeyType peekRootHashValue(const Action& action);
 	bool isKingSafe(ChessCountry country);
-	const int quiescentDelta = 500;
+	const int quiescentDelta = 0;
 	int quiescentDepthMax = 4;
 	int depthMax;
 }; 

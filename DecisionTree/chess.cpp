@@ -3,10 +3,7 @@
 #include<cassert>
 #include<algorithm>
 
-
-
-#define isInRange(value,min,max) (min <= value && value < max)
-#define try_push()
+ 
 
 Chess* Chess::newInstance(Node* node, int x, int y, ChessType type, ChessCountry country)
 {
