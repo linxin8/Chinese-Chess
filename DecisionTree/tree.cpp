@@ -591,11 +591,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 
 	//alpha = std::max(alpha, getEstimatedValue());
 	auto estimateValue = getEstimatedValue();
-	if (estimateValue + quiescentDelta <= alpha)
-	{
-		return alpha;
-	}
-	else if (estimateValue > alpha)
+	if (estimateValue > alpha)
 	{
 		alpha = estimateValue;
 	}
@@ -680,11 +676,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	int value = 0;
 	//beta = std::min(beta, getEstimatedValue());
 	auto estimateValue = getEstimatedValue();
-	if (estimateValue - quiescentDelta >= beta)
-	{
-		return beta;
-	}
-	else if (estimateValue < beta)
+	if (estimateValue < beta)
 	{
 		beta = estimateValue;
 	}
@@ -741,11 +733,7 @@ int Tree::quiescentMinWithDelta(int alpha, int beta, int standardValue)
 	if (timeOver)
 	{
 		return currentValue;
-	}
-	if (currentValue - standardValue < quiescentDelta)
-	{
-		return currentValue;
-	}
+	} 
 	SimpleList<Action, 100> actionCandidate;
 	appendActionCandidate(playerChessCandidate, actionCandidate);    
 	for (auto& action : actionCandidate)
@@ -780,11 +768,7 @@ int Tree::quiescentMaxWithDelta(int alpha, int beta, int standardValue)
 	if (timeOver)
 	{
 		return currentValue;
-	}
-	if (currentValue - standardValue > -quiescentDelta)
-	{
-		return currentValue;
-	}
+	} 
 	SimpleList<Action, 100> actionCandidate;
 	appendActionCandidate(aiChessCandidate, actionCandidate);
 	for (auto& action : actionCandidate)

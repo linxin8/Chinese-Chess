@@ -365,10 +365,10 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 				confilictMap[p->y][p->x] += 1;
 				//threatenMap[p->y][p->x] += 1;
 				auto targetType = board[p->x][p->y].chess->type;
-				if (targetType != None)
-				{
-					totalValue += chessValue[targetType] >> 5;
-				} 
+				//if (targetType != None)
+				//{
+				//	totalValue += chessValue[targetType] >> 5;
+				//} 
 			}
 			for (auto& p : target->defendableList)
 			{
@@ -391,10 +391,10 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 				confilictMap[p->y][p->x] += 1;
 				//threatenMap[p->y][p->x] += 1;
 				auto targetType = board[p->x][p->y].chess->type;
-				if (targetType != None)
-				{
-					totalValue -= chessValue[targetType] >> 5;
-				}
+				//if (targetType != None)
+				//{
+				//	totalValue -= chessValue[targetType] >> 5;
+				//}
 			}
 			for (auto& p : target->defendableList)
 			{ 

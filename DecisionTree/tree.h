@@ -56,8 +56,7 @@ private:
 	static SimpleList<HashKeyType, 200> situationHistory;
 	bool checkIsCurrentSituationRepeated()const;
 	HashKeyType peekRootHashValue(const Action& action);
-	bool isKingSafe(ChessCountry country);
-	const int quiescentDelta = 0;
+	bool isKingSafe(ChessCountry country); 
 	int quiescentDepthMax = 4;
 	int depthMax;
 }; 
