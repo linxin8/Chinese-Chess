@@ -139,7 +139,7 @@ Decision* Tree::deepSearch()
 		//}
 	}
 	std::cout << "reusult: think step -> " << step << ", depth max -> " << depthMaxLast
-		<<", action => ("<<lastBestAction.from->x<<','<< lastBestAction.from->y<<") -> ("<< lastBestAction.des->x <<','<< lastBestAction.des->y <<')'<< std::endl;
+		<<", action => ("<<lastBestAction.from->x<<','<< lastBestAction.from->y<<") -> ("<< lastBestAction.des->x <<','<< lastBestAction.des->y <<')'<< std::endl << std::endl;
 	if (lastBestAction.coveredChessType != None)
 	{
 		situationHistory.clear();
