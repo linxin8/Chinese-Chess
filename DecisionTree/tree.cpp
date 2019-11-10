@@ -81,8 +81,8 @@ void Tree::updateTime()
 {
 	if (--timeCheckCount == 0)
 	{
-		timeCheckCount = 100;
-		if (std::time(nullptr) - lastTime > maxThinkTime)
+		timeCheckCount = 100000;
+		if ((std::clock() - lastTime) / CLOCKS_PER_SEC > maxThinkTime)
 		{
 			timeOver = true;
 		}
@@ -91,7 +91,8 @@ void Tree::updateTime()
 
 Decision* Tree::deepSearch()
 {
-	lastTime = std::time(nullptr);
+	lastTime = std::clock();
+	//lastTime = std::time(nullptr);
 	////minThinkTime = 10;
 	//maxThinkTime = minThinkTime = 100000;
 	//depthMax = 18;
@@ -106,7 +107,7 @@ Decision* Tree::deepSearch()
 	//	<< " (" << last->fromX << ',' << last->fromY << ") -> (" << last->desX << ',' << last->desY << ')' << std::endl;
 	//return last;
 	//auto d = deepSearch(2);
-	timeCheckCount = 100;
+	timeCheckCount = 100000;
 	//timeCheckCount = 100000000;
 	//auto d = deepSearch(3);
 	timeOver = false;
@@ -119,10 +120,11 @@ Decision* Tree::deepSearch()
 	{
 		depthMaxLast = 0;
 		depthMax = step + 8;
-		lastTime = std::time(nullptr); 
+		lastTime = std::clock(); 
 		quiescentDepthMax = 6;
 		std::cout << "try step: " << step << std::endl;
 		auto bestAction = deepSearch(step, getAction ? &lastBestAction : nullptr);
+		std::cout << "  time cost " << 1000.0*(std::clock() - lastTime) / CLOCKS_PER_SEC << std::endl;
 		if (timeOver)
 		{
 			step -= stepIncrement;
@@ -322,11 +324,11 @@ Action Tree::deepSearch(int depthTotal, Action* recommendAction)
 	}
 	if (timeOver)
 	{ 
-		std::cout << "time over" << std::endl; 
+		std::cout << "  time over" << std::endl; 
 	}
 	else
 	{ 
-		std::cout << "max value :" << alpha <<", depth max: "<< depthMaxLast << ", best aciton: " << "(" << bestAction.from->x << ','
+		std::cout << "  max value :" << alpha <<", depth max: "<< depthMaxLast << ", best aciton: " << "(" << bestAction.from->x << ','
 			<< bestAction.from->y << ") -> (" << bestAction.des->x << ',' << bestAction.des->y << ')' << std::endl;
 	}
 	//auto decision = new Decision;
