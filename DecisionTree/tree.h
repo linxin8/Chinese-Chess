@@ -4,6 +4,7 @@
 #include<unordered_map>  
 #include"node.h"  
 #include"hash.h"
+#include<ctime>
 
 class Tree
 {
@@ -38,7 +39,7 @@ private:
 	int minThinkTime = 2;
 	bool timeOver;
 	int timeCheckCount = 100;
-	time_t lastTime;  
+	std::clock_t lastTime;  
 	int depthCurrent = 0;
 	int depthMaxLast = 0;
 	HashKeyType rootHashValue;
