@@ -5,10 +5,13 @@ struct SimpleList
 {
 	T data[N];
 	int length = 0;
+	SimpleList() {};
+	SimpleList(const SimpleList<T, N>& r) { for (int i = 0; i < length; i++) data[i] = r.data[i]; this->length = r.length; }
+	SimpleList& operator=(const SimpleList<T, N>& r) { for (int i = 0; i < length; i++) data[i] = r.data[i]; this->length = r.length; return *this; }
 	void push_back(const T& r) { data[length++] = r; }
 	void pop_back() { length--; }
 	T& front()const { return data[0]; }
-	T& back()const { return data[length - 1]; }
+	T& back(){ return data[length - 1]; }
 	T& operator[](int i)const { return data[i]; }
 	T& operator[](int i) { return data[i]; }
 	T* begin() { return data; };
@@ -92,5 +95,4 @@ struct Action
 	struct ChessPosition* des = nullptr;
 	ChessType coveredChessType;
 }; 
-
-
+ 

@@ -57,6 +57,14 @@ Tree::Tree(int state[10][9]):root(state)
 			rootHashMap[i][j].clear();
 		}
 	} 
+	for (auto& i : aiChessCandidate)
+	{
+		i->updateTarget();
+	}
+	for (auto& i : playerChessCandidate)
+	{
+		i->updateTarget();
+	}
 }
 
 
@@ -824,7 +832,8 @@ void Tree::doAction(const Action& action)
 		{
 			aiChessCount -= 1;
 		}
-	} 
+	}  
+	notifyBoardChange(from->x, from->y, des->x, des->y);
 }
 
 void Tree::undoAction()
@@ -842,6 +851,7 @@ void Tree::undoAction()
 	from->chess->setY(from->y);
 	des->chess->setX(des->x);
 	des->chess->setY(des->y);
+	notifyBoardUndoChange(from->x, from->y, des->x, des->y);
 	des->chess->setType(action.coveredChessType);
 	from->chess->cp = from;
 	des->chess->cp = des;
@@ -859,7 +869,43 @@ void Tree::undoAction()
 			aiChessCount += 1;
 		}
 	}
-	situationHistory.pop_back();
+	situationHistory.pop_back();  
+}
+
+void Tree::notifyBoardChange(int x1, int y1, int x2, int y2)
+{
+	for (auto& i : aiChessCandidate)
+	{
+		if (i->type != None)
+		{ 
+			i->onBoardChessMove(x1, y1, x2, y2);
+		}
+	}	
+	for (auto& i : playerChessCandidate)
+	{
+		if (i->type != None)
+		{
+			i->onBoardChessMove(x1, y1, x2, y2);
+		}
+	}
+}
+
+void Tree::notifyBoardUndoChange(int x1, int y1, int x2, int y2)
+{
+	for (auto& i : aiChessCandidate)
+	{
+		if (i->type != None)
+		{
+			i->onBoardChessUndoMove(x1, y1, x2, y2);
+		}
+	}
+	for (auto& i : playerChessCandidate)
+	{
+		if (i->type != None)
+		{
+			i->onBoardChessUndoMove(x1, y1, x2, y2);
+		}
+	}
 }
  
 void Tree::debugPrintAction() const

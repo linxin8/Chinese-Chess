@@ -23,6 +23,8 @@ private:
 
 	void doAction(const Action& action);
 	void undoAction();
+	void notifyBoardChange(int x1, int y1, int x2, int y2);
+	void notifyBoardUndoChange(int x1, int y1, int x2, int y2);
 public:
 	ChessTarget* getTarget(int x,int y);
 private:

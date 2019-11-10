@@ -1,8 +1,7 @@
-#pragma once
-#include<list>
+#pragma once 
 #include"debug.h"
 #include"common.h"
-
+#include<bitset>
 
 class Chess
 { 
@@ -25,12 +24,14 @@ public:
 	bool isNoneTypeChess() const { return this->type == None; }
 	//ChessType getType() const { return type; }
 	//ChessCountry getCountry() const { return country; }
-	ChessTarget* getTarget(){ updateTarget(); return target; }
+	ChessTarget* getTarget(){ /*updateTarget();*/ return target; }
 	bool operator !=(const Chess& r) { return this->type != r.type || this->country != r.country || this->px != r.px || this->py != r.py; }
 	void setCountry(ChessCountry country) { this->country = country; }
 	void setType(ChessType type) { this->type = type; }
-private:
+	void onBoardChessMove(int x1, int y1, int x2, int y2);
+	void onBoardChessUndoMove(int x1, int y1, int x2, int y2);
 	void updateTarget();
+private:
 	void sortAssaultableTarget();
 protected:
 	//bool isInRange(int value, int min, int max) { return min <= value && value < max; }// [min,max)
@@ -44,6 +45,9 @@ public:
 protected:
 	class Node* node; 
 	ChessTarget* target;
+	std::bitset<90> partialView;
+	SimpleList<std::bitset<90>,60> partialViewList;
+	SimpleList<ChessTarget, 60> targetList;
 };
 
 class NoneChess :public Chess

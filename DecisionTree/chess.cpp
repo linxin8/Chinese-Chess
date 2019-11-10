@@ -31,11 +31,36 @@ Chess* Chess::newInstance(Node* node, int x, int y, ChessType type, ChessCountry
 	return nullptr;
 }
 
+void Chess::onBoardChessMove(int x1, int y1, int x2, int y2)
+{
+	if (partialView.test(y1 * 9 + x1) ||
+		partialView.test(y2 * 9 + x2))
+	{
+		updateTarget();
+	}
+}
+
+void Chess::onBoardChessUndoMove(int x1, int y1, int x2, int y2)
+{
+	if ((px==x1&&py==y1)||
+		(px==x2&&py==y2)||
+		partialView.test(y1 * 9 + x1) ||
+		partialView.test(y2 * 9 + x2))
+	{
+		targetList.length--;
+		target = &targetList.back();
+		partialView = partialViewList.back();
+		partialViewList.pop_back();
+	}
+}
+
 void Chess::updateTarget()
-{  
-	target->clear();
+{
+	partialViewList.push_back(partialView);
+	target = targetList.end();
 	recomputeTargetPositionInfo();
-	sortAssaultableTarget();
+	targetList.length++;
+	//sortAssaultableTarget();
 }
 void Chess::sortAssaultableTarget()
 {
@@ -43,7 +68,7 @@ void Chess::sortAssaultableTarget()
 //	std::sort(target->assaultableList.position, target->assaultableList.position + target->assaultableList.length,
 //		[&chessPriority](ChessPosition* a, ChessPosition*  b) {return chessPriority[a->chess->type] > chessPriority[b->chess->type]; });
 //
-}
+} 
 
 const Position PawnChess::relativePosition[4]{ {1,0},{-1,0},{0,-1},{0,1} };
 void PawnChess::recomputeTargetPositionInfo()
@@ -85,22 +110,25 @@ void PawnChess::recomputeTargetPositionInfo()
 	//			target->defendableList.push_back(cp);
 	//		}
 	//	}
-	//} 
-
+	//}  
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	auto& candidate = country == Black ? cp->pawnCandidate.blackCandidate : cp->pawnCandidate.redCandidate;
 	for (auto& i : candidate)
 	{
+		partialView.set(i->y * 9 + i->x, true);
 		if (i->chess->type == None)
 		{
-			target->moveableList.push_back(i);
+			target->moveableList.push_back(i);  
 		}
 		else if (i->chess->country != country)
 		{
-			target->assaultableList.push_back(i);
+			target->assaultableList.push_back(i); 
 		}
 		else
 		{
-			target->defendableList.push_back(i);
+			target->defendableList.push_back(i); 
 		}
 	} 
 }
@@ -141,11 +169,14 @@ void CannonChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//}  
-
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	ChessPosition* temp;
 #define TEMP_MARCO(direction)\
 	for (temp = cp->direction; temp != nullptr; temp = temp->direction)\
 	{\
+		partialView.set(temp->y * 9 + temp->x, true); \
 		if (temp->chess->type == None)\
 		{\
 			target->moveableList.push_back(temp);\
@@ -154,6 +185,7 @@ void CannonChess::recomputeTargetPositionInfo()
 		{\
 			for (temp = temp->direction; temp != nullptr; temp = temp->direction)\
 			{\
+				partialView.set(temp->y * 9 + temp->x, true); \
 				if (temp->chess->type != None)\
 				{\
 					if (temp->chess->country != country)\
@@ -203,11 +235,14 @@ void RookChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//}
-
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	ChessPosition* temp; 
 #define  TEMP_MARCO(direction) \
 	for (temp = cp->direction; temp != nullptr; temp = temp->direction) \
 	{\
+		partialView.set(temp->y * 9 + temp->x, true); \
 		if (temp->chess->type == None)\
 		{\
 			target->moveableList.push_back(temp);\
@@ -259,12 +294,17 @@ void KnightChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//} 
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	for (int i = 0; i < cp->knightCandidate.candidate.length; i++)
 	{
 		auto& candidate = cp->knightCandidate.candidate[i];
-		auto& handicap = cp->knightCandidate.handicap[i];
+		auto& handicap = cp->knightCandidate.handicap[i]; 
+		partialView.set(handicap->y * 9 + handicap->x, true);  
 		if (handicap->chess->type == None)
 		{
+			partialView.set(candidate->y * 9 + candidate->x, true);
 			if (candidate->chess->type == None)
 			{
 				target->moveableList.push_back(candidate);
@@ -312,12 +352,17 @@ void ElephantChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//}
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	for (int i = 0; i < cp->elephantCandidate.candidate.length; i++)
 	{
 		auto& candidate = cp->elephantCandidate.candidate[i];
 		auto& handicap = cp->elephantCandidate.handicap[i];
+		partialView.set(handicap->y * 9 + handicap->x, true);
 		if (handicap->chess->type == None)
 		{
+			partialView.set(candidate->y * 9 + candidate->x, true);
 			if (candidate->chess->type == None)
 			{
 				target->moveableList.push_back(candidate);
@@ -361,8 +406,12 @@ void GuardChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//} 
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	for (auto& i : cp->guardCandidate)
 	{
+		partialView.set(i->y * 9 + i->x, true);
 		if (i->chess->type == None)
 		{
 			target->moveableList.push_back(i);
@@ -405,8 +454,12 @@ void KingChess::recomputeTargetPositionInfo()
 	//		}
 	//	}
 	//}
+	partialView.reset();
+	partialView.set(py * 9 + px, true);
+	target->clear();
 	for (auto& i : cp->kingCandidate)
 	{
+		partialView.set(i->y * 9 + i->x, true);
 		if (i->chess->type == None)
 		{
 			target->moveableList.push_back(i);
@@ -421,30 +474,39 @@ void KingChess::recomputeTargetPositionInfo()
 		}
 	}
 	ChessPosition* temp;
-	for (temp = cp->up; temp != nullptr; temp = temp->up)
-	{
-		auto t = temp->chess->type;
-		if (t == King)
+	if (country == Red)
+	{ 
+		for (temp = cp->up; temp != nullptr; temp = temp->up)
 		{
-			target->assaultableList.push_back(temp);
-			break;
-		}
-		if (t != None)
-		{
-			break;
-		}
-	}
-	for (temp = cp->down; temp != nullptr; temp = temp->down)
-	{
-		auto t = temp->chess->type;
-		if (t == King)
-		{
-			target->assaultableList.push_back(temp);
-			break;
-		}
-		if (t != None)
-		{
-			break;
+			partialView.set(temp->y * 9 + temp->x, true);
+			auto& t = temp->chess->type;
+			if (t == King)
+			{
+				target->assaultableList.push_back(temp);
+				break;
+			}
+			if (t != None)
+			{
+				break;
+			}
 		}
 	}
+	else
+	{
+		for (temp = cp->down; temp != nullptr; temp = temp->down)
+		{
+			partialView.set(temp->y * 9 + temp->x, true);
+			auto& t = temp->chess->type;
+			if (t == King)
+			{
+				target->assaultableList.push_back(temp);
+				break;
+			}
+			if (t != None)
+			{
+				break;
+			}
+		}
+	}
+
 }
