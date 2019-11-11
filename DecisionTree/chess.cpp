@@ -42,9 +42,7 @@ void Chess::onBoardChessMove(int x1, int y1, int x2, int y2)
 
 void Chess::onBoardChessUndoMove(int x1, int y1, int x2, int y2)
 {
-	if ((px==x1&&py==y1)||
-		(px==x2&&py==y2)||
-		partialView.test(y1 * 9 + x1) ||
+	if (partialView.test(y1 * 9 + x1) ||
 		partialView.test(y2 * 9 + x2))
 	{
 		targetList.length--;
