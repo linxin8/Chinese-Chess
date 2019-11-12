@@ -108,15 +108,18 @@ Decision* Tree::deepSearch()
 	int stepIncrement = 2; 
 	maxThinkTime = 2;
 	bool getAction = false;
+	int actionTotalCount = 0;
 	for (; step < 20; step += stepIncrement)
 	{
 		depthMaxLast = 0;
 		depthMax = step + 8;
 		lastTime = std::clock(); 
 		quiescentDepthMax = 6;
+		actionCount = 0;
 		std::cout << "try step: " << step << std::endl;
 		auto bestAction = deepSearch(step, getAction ? &lastBestAction : nullptr);
-		std::cout << "  time cost " << 1000.0*(std::clock() - lastTime) / CLOCKS_PER_SEC << std::endl;
+		actionTotalCount += actionCount;
+		std::cout << "  time cost " << 1000.0*(std::clock() - lastTime) / CLOCKS_PER_SEC << ", action count " << actionCount << std::endl;
 		if (timeOver)
 		{
 			step -= stepIncrement;
@@ -131,7 +134,7 @@ Decision* Tree::deepSearch()
 		//}
 	}
 	std::cout << "reusult: think step -> " << step << ", depth max -> " << depthMaxLast
-		<<", action => ("<<lastBestAction.from->x<<','<< lastBestAction.from->y<<") -> ("<< lastBestAction.des->x <<','<< lastBestAction.des->y <<')'<< std::endl << std::endl;
+		<<", action => ("<<lastBestAction.from->x<<','<< lastBestAction.from->y<<") -> ("<< lastBestAction.des->x <<','<< lastBestAction.des->y <<')' << ", action total count " << actionTotalCount << std::endl << std::endl;
 	if (lastBestAction.coveredChessType != None)
 	{
 		situationHistory.clear();
@@ -827,6 +830,7 @@ void Tree::doAction(const Action& action)
 			aiChessCount -= 1;
 		}
 	} 
+	actionCount++;
 }
 
 void Tree::undoAction()
