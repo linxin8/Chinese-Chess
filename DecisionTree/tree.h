@@ -62,4 +62,5 @@ private:
 	bool isKingSafe(ChessCountry country); 
 	int quiescentDepthMax = 4;
 	int depthMax;
+	int actionCount;
 }; 
