@@ -1,4 +1,5 @@
 #pragma once   
+#include<cstring>
 
 template<typename T, int N>
 struct SimpleList
@@ -95,4 +96,27 @@ struct Action
 	struct ChessPosition* des = nullptr;
 	ChessType coveredChessType;
 }; 
- 
+
+#define positonMap(x, y)  ((y << 3) + y + x) // y*9+x
+//#define positonMap(x, y)  ((y << 4) + x) // y*9+x
+struct BoardHashMap
+{ 
+	bool data[90]; 
+	bool operator()(int x, int y)
+	{
+		return data[positonMap(x,y)];
+	} 
+	void reset()
+	{ 
+		std::memset(data, 0, sizeof(data));
+	}
+	void set(int x, int y)
+	{ 
+		data[positonMap(x, y)] = true;
+	}
+	bool test(int x, int y)
+	{
+		return data[positonMap(x, y)];
+	}
+};
+#undef positonMap

@@ -31,8 +31,9 @@ public:
 private:
 	void updateTime();
 	void debugPrintAction()const;
-	int getEstimatedValue();
+	int getEstimatedValue(ChessCountry currentTurnCountry);
 	void appendActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
+	void appendAllActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
 	void appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
  private: 
 	Node root; 
@@ -62,5 +63,5 @@ private:
 	bool isKingSafe(ChessCountry country); 
 	int quiescentDepthMax = 4;
 	int depthMax;
-	int actionCount;
+	int actionCount; 
 }; 

@@ -143,10 +143,11 @@ void Node::initChessPosistion(int x, int y)
 }
 
 //None,Pawn,Cannon,Rook,Knight,Elephant,Guard,King 
-constexpr static int chessValue[8] = { 0,200,1500,3500,1500,800,800,/*100000000*/ 4000 };
-constexpr static int chessConfilictValue[8] = { 0,200/4,1500/4,3500/4,1500/4,800/4,800/4,/*100000000*/ 0 };
-constexpr static int moveShiftValue[8] = { 0,0,1,2,4,1,1,0 };
-constexpr static int positionValue[2][8][10][9] =
+constexpr static int chessValue[8] = { 0,300,1500,3500,1500,800,800,/*100000000*/ 4000 };
+constexpr static int chessConfilictValueSente[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 400 };
+constexpr static int chessConfilictValueGote[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 400 };
+constexpr static int moveShiftValue[8] = { 0,0,1,1,2,1,1,0 };
+int positionValue[2][8][10][9] =
 {
 {//black chess
 	{// None
@@ -165,7 +166,7 @@ constexpr static int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{  20,   0,  20,   0, 400,   0,  20,   0,  20},
+		{  20,   0,  20,   0, 300,   0,  20,   0,  20},
 		{  30,   0, 180,   0,  80,   0, 180,   0,  30},
 		{ 140, 160, 300, 330, 380, 330, 200, 160, 140},
 		{ 160, 191, 432, 483, 404, 483, 232, 201, 160},
@@ -174,20 +175,20 @@ constexpr static int positionValue[2][8][10][9] =
 		{ 280, 341, 412, 590, 590, 590, 412, 341, 280},
 	},
 	{// Cannon
+		{  20,  40,  30,  40,  40,  40,  30,  30,  20},
+		{  40,  30,  30,  40,  40,  40,  30,  30,  20},
+		{  20,  30,  30,  40,  80,  40,  30,  30,  20},
 		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
 		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 280,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
+		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
 		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
 		{ 100, 100, 100,  80,  80,  80, 100, 100, 100},
 	},
 	{// Rook
-		{-100,  20,  20, 100, 100, 100,  20,  20,-100},
-		{  20,  30,  30, 100, 100, 100,  30,  30,  20},
+		{-100,  50,  20, 100, 100, 100,  20,  50,-100},
+		{  50,  30,  30, 100, 100, 100,  30,  30,  50},
 		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
 		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
 		{  20, 100, 100, 100, 100, 100, 100, 100,  20},
@@ -260,52 +261,52 @@ constexpr static int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// Pawn 
-		{ 280, 341, 412, 490, 490, 490, 412, 341, 280},
-		{ 230, 281, 342, 490, 490, 490, 342, 281, 230},
-		{ 200, 231, 282, 343, 414, 343, 282, 231, 200},
-		{ 160, 191, 232, 283, 304, 283, 232, 201, 160},
-		{ 140, 160, 200, 230, 280, 230, 200, 160, 140},
-		{  30,   0, 180,   0,  80,   0, 180,   0,  30},
-		{  20,   0,  20,   0, 400,   0,  20,   0,  20},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// Cannon 
-		{ 100, 100, 100,  80,  80,  80, 100, 100, 100},
-		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 240,  40,  30,  30,  20},
-		{  20,  30,  30,  40, 280,  40,  30,  30,  20},
-		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
-		{  20,  30,  30,  40,  40,  40,  30,  30,  20},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// Rook
-		{  20,  30,  30, 100, 100, 100,  30,  30,  20},
-		{  20,  30,  30, 100, 100, 100,  30,  30,  20},
-		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
-		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
-		{  20, 100, 100, 100, 100, 100, 100, 100,  20},
-		{  20, 100, 100, 100, 100, 100, 100, 100,  20},
-		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
-		{  20,  30,  40, 100, 100, 100,  40,  30,  20},
-		{  20,  30,  30, 100, 100, 100,  30,  30,  20},
-		{-100, 100, 100, 100, 100, 100, 100, 100,-100},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	}, 
 	{// Knight
-		{ 110, 130, 140, 150, 150, 150, 140, 130, 110},
-		{ 110, 130, 140, 150, 150, 150, 140, 130, 110},
-		{ 110, 130, 140, 150, 150, 150, 140, 130, 110},
-		{ 110, 130, 130, 130, 130, 130, 130, 130, 110},
-		{ 110, 110, 110, 110, 110, 110, 110, 110, 110},
-		{  10,  30,  40,  50,  50,  50,  40,  30,  10},
-		{  10,  30,  40,  50,  50,  50,  40,  30,  10},
-		{  10,  30,  40,  50,  50,  50,  40,  30,  10},
-		{  10,  30,  30,  30,  30,  30,  30,  30,  10},
-		{  10,-100,  10,  10,  10,  10,  10,-100,  10},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// Elephant
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
@@ -313,11 +314,11 @@ constexpr static int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{   0,   0,  40,   0,   0,   0,  40,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{  20,   0,   0,   0, 200,   0,   0,   0,  20},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{   0,   0,  40,   0,   0,   0,  40,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// Guard
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
@@ -327,9 +328,9 @@ constexpr static int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{   0,   0,   0,  50,   0,  50,   0,   0,   0},
-		{   0,   0,   0,   0, 100,   0,   0,   0,   0},
-		{   0,   0,   0, 100,   0, 100,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 	{// King 
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
@@ -339,14 +340,31 @@ constexpr static int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{   0,   0,   0,  50,  50,  50,   0,   0,   0},
-		{   0,   0,   0, 100, 350, 100,   0,   0,   0},
-		{   0,   0,   0, 350, 600, 350,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
+		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 	},
 },
 };
+ 
+struct __InitPositionValue
+{
+	__InitPositionValue()
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				for (int k = 0; k < 9; k++)
+				{
+					positionValue[1][i][j][k] = positionValue[0][i][9 - j][k];
+				}
+			}
+		}
+	}
+}__initPositionValue;
 
-int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate)
+int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate,ChessCountry currentCountry)
 {
 	int totalValue = 0;
 	char confilictMap[10][9]{}; 
@@ -364,7 +382,7 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 			{
 				confilictMap[p->y][p->x] += 1;
 				//threatenMap[p->y][p->x] += 1;
-				auto targetType = board[p->x][p->y].chess->type;
+				//auto targetType = board[p->x][p->y].chess->type;
 				//if (targetType != None)
 				//{
 				//	totalValue += chessValue[targetType] >> 5;
@@ -390,7 +408,7 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 			{ 
 				confilictMap[p->y][p->x] += 1;
 				//threatenMap[p->y][p->x] += 1;
-				auto targetType = board[p->x][p->y].chess->type;
+				//auto targetType = board[p->x][p->y].chess->type;
 				//if (targetType != None)
 				//{
 				//	totalValue -= chessValue[targetType] >> 5;
@@ -435,34 +453,69 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 	//		confilictMap[p->y][p->x] -= 1;
 	//	}
 	//} 
-	for (auto&chess : aiCandidate)
+	if (currentCountry == Black)
 	{
-		if (chess->type != None)
-		{ 
-			if (confilictMap[chess->px][chess->py] > 0)
+		for (auto&chess : aiCandidate)
+		{//sente
+			if (chess->type != None)
 			{
-				totalValue -= chessConfilictValue[chess->type];
+				if (confilictMap[chess->py][chess->px] > 0)
+				{
+					totalValue -= chessConfilictValueSente[chess->type];
+				}
+				//if (threatenMap[y][x] > 0)
+				//{
+				//	totalValue -= chessValue[chess->type] / 8 * threatenMap[y][x];
+				//}
 			}
-			//if (threatenMap[y][x] > 0)
-			//{
-			//	totalValue -= chessValue[chess->type] / 8 * threatenMap[y][x];
-			//}
+		}
+		for (auto&chess : playerCandidate)
+		{//gote
+			if (chess->type != None)
+			{
+				if (confilictMap[chess->py][chess->px] > 0)
+				{
+					totalValue += chessConfilictValueGote[chess->type];
+				}
+				//if (threatenMap[y][x] > 0)
+				//{
+				//	totalValue += chessValue[chess->type] / 8 * threatenMap[y][x];
+				//}
+			}
 		}
 	}
-	for (auto&chess : playerCandidate)
+	else
 	{
-		if (chess->type != None)
-		{ 
-			if (confilictMap[chess->px][chess->py] > 0)
+		for (auto&chess : aiCandidate)
+		{//gote
+			if (chess->type != None)
 			{
-				totalValue += chessConfilictValue[chess->type];
+				if (confilictMap[chess->py][chess->px] > 0)
+				{
+					totalValue -= chessConfilictValueGote[chess->type];
+				}
+				//if (threatenMap[y][x] > 0)
+				//{
+				//	totalValue -= chessValue[chess->type] / 8 * threatenMap[y][x];
+				//}
 			}
-			//if (threatenMap[y][x] > 0)
-			//{
-			//	totalValue += chessValue[chess->type] / 8 * threatenMap[y][x];
-			//}
+		}
+		for (auto&chess : playerCandidate)
+		{//sente
+			if (chess->type != None)
+			{
+				if (confilictMap[chess->py][chess->px] > 0)
+				{
+					totalValue += chessConfilictValueSente[chess->type];
+				}
+				//if (threatenMap[y][x] > 0)
+				//{
+				//	totalValue += chessValue[chess->type] / 8 * threatenMap[y][x];
+				//}
+			}
 		}
 	}
+
 
 	//for (auto& target : aiTarget)
 	//{ 

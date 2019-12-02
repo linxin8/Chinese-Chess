@@ -4,15 +4,15 @@
 #include<bitset>
 
 class Chess
-{ 
+{
 public:
 	static Chess* newInstance(class Node* node, int x, int y, ChessType type, ChessCountry country);
 public:
 	Chess() = delete;
 	virtual ~Chess() {}
 protected:
-	Chess(class Node* node,int x,int y, ChessType type, ChessCountry country)
-		:node(node),px(x),py(y),type(type), country(country),target(new ChessTarget()){}
+	Chess(class Node* node, int x, int y, ChessType type, ChessCountry country)
+		:node(node), px(x), py(y), type(type), country(country), target(new ChessTarget()) {}
 public:
 	void setX(int x) { this->px = x; }
 	void setY(int y) { this->py = y; }
@@ -24,7 +24,7 @@ public:
 	bool isNoneTypeChess() const { return this->type == None; }
 	//ChessType getType() const { return type; }
 	//ChessCountry getCountry() const { return country; }
-	ChessTarget* getTarget(){ /*updateTarget();*/ return target; }
+	ChessTarget* getTarget() { /*updateTarget();*/ return target; }
 	bool operator !=(const Chess& r) { return this->type != r.type || this->country != r.country || this->px != r.px || this->py != r.py; }
 	void setCountry(ChessCountry country) { this->country = country; }
 	void setType(ChessType type) { this->type = type; }
@@ -36,6 +36,7 @@ private:
 protected:
 	//bool isInRange(int value, int min, int max) { return min <= value && value < max; }// [min,max)
 	virtual void recomputeTargetPositionInfo() = 0;
+	//int positonMap(int x, int y) { return (y << 3) + y + x; }// y*9+x
 public: 
 	ChessType type;
 	ChessCountry country;
@@ -44,9 +45,8 @@ public:
 	int py;
 protected:
 	class Node* node; 
-	ChessTarget* target;
-	std::bitset<90> partialView;
-	SimpleList<std::bitset<90>,60> partialViewList;
+	ChessTarget* target; 
+	SimpleList<BoardHashMap,60> partialViewList;
 	SimpleList<ChessTarget, 60> targetList;
 };
 
