@@ -144,10 +144,10 @@ void Node::initChessPosistion(int x, int y)
 
 //None,Pawn,Cannon,Rook,Knight,Elephant,Guard,King 
 constexpr static int chessValue[8] = { 0,200,1500,3500,1500,800,800,/*100000000*/ 4000 };
-constexpr static int chessConfilictValueSente[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 40000 };
-constexpr static int chessConfilictValueGote[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 40000 };
+constexpr static int chessConfilictValueSente[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 2000 };
+constexpr static int chessConfilictValueGote[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 2000 };
 //constexpr static int chessConfilictValueGote[8] = { 0,300 / 3,1500 / 3,3500 / 3,1500 / 3,800 / 3,800 / 3, 400 };
-constexpr static int moveShiftValue[8] = { 0,0,1,1,2,1,1,0 };
+constexpr static int moveShiftValue[8] = { 0,0,1,2,2,1,1,0 };
 static int positionValue[2][8][10][9] =
 {
 {//black chess

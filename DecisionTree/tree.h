@@ -32,8 +32,9 @@ private:
 	void updateTime();
 	void debugPrintAction()const;
 	int getEstimatedValue(ChessCountry currentTurnCountry);
-	void appendActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
+	void appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
 	void appendAllActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
+	void appendAssaultableGoodActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
 	void appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate);
  private: 
 	Node root; 
