@@ -143,11 +143,12 @@ void Node::initChessPosistion(int x, int y)
 }
 
 //None,Pawn,Cannon,Rook,Knight,Elephant,Guard,King 
-constexpr static int chessValue[8] = { 0,300,1500,3500,1500,800,800,/*100000000*/ 4000 };
-constexpr static int chessConfilictValueSente[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 400 };
-constexpr static int chessConfilictValueGote[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 400 };
+constexpr static int chessValue[8] = { 0,200,1500,3500,1500,800,800,/*100000000*/ 4000 };
+constexpr static int chessConfilictValueSente[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 40000 };
+constexpr static int chessConfilictValueGote[8] = { 0,300 / 4,1500 / 4,3500 / 4,1500 / 4,800 / 4,800 / 4, 40000 };
+//constexpr static int chessConfilictValueGote[8] = { 0,300 / 3,1500 / 3,3500 / 3,1500 / 3,800 / 3,800 / 3, 400 };
 constexpr static int moveShiftValue[8] = { 0,0,1,1,2,1,1,0 };
-int positionValue[2][8][10][9] =
+static int positionValue[2][8][10][9] =
 {
 {//black chess
 	{// None
@@ -167,9 +168,9 @@ int positionValue[2][8][10][9] =
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{  20,   0,  20,   0, 300,   0,  20,   0,  20},
-		{  30,   0, 180,   0,  80,   0, 180,   0,  30},
+		{  30,   0, 150,   0,  80,   0, 150,   0,  30},
 		{ 140, 160, 300, 330, 380, 330, 200, 160, 140},
-		{ 160, 191, 432, 483, 404, 483, 232, 201, 160},
+		{ 160, 201, 232, 483, 404, 483, 232, 201, 160},
 		{ 200, 231, 382, 543, 514, 543, 382, 231, 200},
 		{ 230, 281, 342, 590, 590, 590, 342, 281, 230},
 		{ 280, 341, 412, 590, 590, 590, 412, 341, 280},
@@ -199,7 +200,7 @@ int positionValue[2][8][10][9] =
 		{  20,  30,  30, 100, 100, 100,  30,  30,  20},
 	},
 	{// Knight
-		{  10,-100,  10,  10,  10,  10,  10,-100,  10},
+		{  10, -50,  10,  10,  10,  10,  10, -50,  10},
 		{  10,  30,  30,  30,-100,  30,  30,  30,  10},
 		{  10,  30,  40,  40,  40,  40,  40,  30,  10},
 		{  10,  30,  40,  50,  50,  50,  40,  30,  10},
@@ -213,9 +214,9 @@ int positionValue[2][8][10][9] =
 	{// Elephant
 		{   0,   0,  40,   0,   0,   0,  40,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{  20,   0,   0,   0, 200,   0,   0,   0,  20},
+		{  20,   0,   0,   0, 100,   0,   0,   0,  20},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
-		{   0,   0,  40,   0,   0,   0,  40,   0,   0},
+		{   0,   0,  30,   0,   0,   0,  30,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
 		{   0,   0,   0,   0,   0,   0,   0,   0,   0},
@@ -365,7 +366,7 @@ struct __InitPositionValue
 }__initPositionValue;
 
 int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate,ChessCountry currentCountry)
-{
+{ 
 	int totalValue = 0;
 	char confilictMap[10][9]{}; 
 	//char threatenMap[10][9]{};
