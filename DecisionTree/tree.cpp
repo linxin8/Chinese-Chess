@@ -157,7 +157,7 @@ Decision* Tree::deepSearch()
 	return decision;
 }
 
-int Tree::getEstimatedValue(ChessCountry currentTurnCountry)
+int Tree::getEstimatedValue()
 { 
 	//auto& map = rootHashMap[aiChessCount][playerChessCount];
 	//auto it = map.find(rootHashValue);
@@ -210,7 +210,7 @@ void Tree::appendAllActionCandidate(const std::vector<Chess*>& chessCandidate, S
 		for (int i = lengthLast; i < actionCandidate.length; i++)
 		{
 			doAction(actionCandidate[i]);
-			value[i].first = getEstimatedValue(currentTurnCountry == Black ? Red : Black);
+			value[i].first = getEstimatedValue();
 			sum += value[i].first;
 			value[i].second = i;
 			undoAction();
@@ -236,7 +236,7 @@ void Tree::appendAllActionCandidate(const std::vector<Chess*>& chessCandidate, S
 
 }
 
-void Tree::appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
+void Tree::appendSortedActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
 {
 	ChessCountry currentTurnCountry;
 	for (auto& c : chessCandidate)
@@ -249,14 +249,13 @@ void Tree::appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, 
 	}
 	Action actionTemp;
 	auto lengthLast = actionCandidate.length;
-	SimpleList<Action, 100> shrinkTemp;
 	for (size_t i = 0; i < chessCandidate.size(); i++)
-	{ 
+	{
 		if (chessCandidate[i]->type != None)
 		{
 			auto target = chessCandidate[i]->getTarget();
-			actionTemp.from = root.getChessPositoin(chessCandidate[i]->getX(), chessCandidate[i]->getY()); 
-			for(auto& p:target->assaultableList) 
+			actionTemp.from = root.getChessPositoin(chessCandidate[i]->getX(), chessCandidate[i]->getY());
+			for (auto& p : target->assaultableList)
 			{
 				actionTemp.des = root.getChessPositoin(p->x, p->y);
 				actionTemp.coveredChessType = actionTemp.des->chess->type;
@@ -269,44 +268,35 @@ void Tree::appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, 
 				actionCandidate.push_back(actionTemp);
 			}
 		}
-	} 
-	if (actionCandidate.length > 0)
+	}
+	std::pair<int, int> value[100];
+	for (int i = lengthLast; i < actionCandidate.length; i++)
 	{
-		int newSize = actionCandidate.length;
-		if (newSize > 100)
-		{
-			newSize -= (actionCandidate.length - 30) / 2;
-		}
-		std::pair<int, int> value[100]; 
-		for (int i = lengthLast; i < actionCandidate.length; i++)
-		{
-			doAction(actionCandidate[i]);
-			value[i].first = getEstimatedValue(currentTurnCountry == Black ? Red : Black); 
-			value[i].second = i;
-			undoAction();
-		}
-		if (currentTurnCountry == Black)
-		{
-			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::greater<std::pair<int, int>>());
-		}
-		else
-		{ 
-			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::less<std::pair<int, int>>());
-		} 
-		Action temp[50];
-		for (int i = lengthLast; i < newSize; i++)
-		{
-			temp[i] = actionCandidate[value[i].second];
-		}
-		for (int i = lengthLast; i < newSize; i++)
-		{
-			actionCandidate[i] = temp[i];
-		}   
-		actionCandidate.length = newSize;
-	} 
+		doAction(actionCandidate[i]);
+		value[i].first = getEstimatedValue();
+		value[i].second = i;
+		undoAction();
+	}
+	if (currentTurnCountry == Black)
+	{
+		std::sort(value + lengthLast, value + actionCandidate.length, std::greater<std::pair<int, int>>());
+	}
+	else
+	{
+		std::sort(value + lengthLast, value + actionCandidate.length, std::less<std::pair<int, int>>());
+	}
+	Action temp[100];
+	for (int i = lengthLast; i < actionCandidate.length; i++)
+	{
+		temp[i] = actionCandidate[value[i].second];
+	}
+	for (int i = lengthLast; i < actionCandidate.length; i++)
+	{
+		actionCandidate[i] = temp[i];
+	}
 }
 
-void Tree::appendAssaultableGoodActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
+void Tree::appendSortedAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
 {
 	Action actionTemp;
 	ChessCountry currentTurnCountry;
@@ -336,16 +326,12 @@ void Tree::appendAssaultableGoodActionCandidate(const std::vector<Chess*>& chess
 	//std::cout << actionCandidate.length << '\n';
 	if (actionCandidate.length > 0)
 	{
-		int newSize = actionCandidate.length;
-		if (newSize > 2)
-		{
-			newSize -= (actionCandidate.length - 2) / 2;
-		}
+		int newSize = actionCandidate.length; 
 		std::pair<int, int> value[20];
 		for (int i = lengthLast; i < actionCandidate.length; i++)
 		{
 			doAction(actionCandidate[i]);
-			value[i].first = getEstimatedValue(currentTurnCountry == Black ? Red : Black);
+			value[i].first = getEstimatedValue();
 			value[i].second = i;
 			undoAction();
 		}
@@ -405,6 +391,49 @@ void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCand
 	//});
 }
 
+void Tree::appendSafeActionCandidate(ChessCountry currentTurnCountry, SimpleList<Action, 100>& actionCandidate)
+{
+	Action actionTemp; 
+	auto& selfChess = (currentTurnCountry == Black) ? aiChessCandidate : playerChessCandidate;
+	for (size_t i = 0; i < selfChess.size(); i++)
+	{
+		if (selfChess[i]->type != None)
+		{
+			auto target = selfChess[i]->getTarget();
+			actionTemp.from = root.getChessPositoin(selfChess[i]->getX(), selfChess[i]->getY());
+			for (auto& p : target->assaultableList)
+			{
+				actionTemp.des = root.getChessPositoin(p->x, p->y);
+				actionTemp.coveredChessType = actionTemp.des->chess->type;
+				if (p->chess->type == King)
+				{
+					actionCandidate.push_back(actionTemp);
+				}
+				else
+				{
+					doAction(actionTemp);
+					if (isKingSafe(currentTurnCountry))
+					{ 
+						actionCandidate.push_back(actionTemp);
+					}
+					undoAction();
+				}
+			}
+			for (auto& p : target->moveableList)
+			{
+				actionTemp.des = root.getChessPositoin(p->x, p->y);
+				actionTemp.coveredChessType = actionTemp.des->chess->type; 
+				doAction(actionTemp);
+				if (isKingSafe(currentTurnCountry))
+				{
+					actionCandidate.push_back(actionTemp);
+				}
+				undoAction();
+			}
+		}
+	}
+}
+
 bool Tree::checkIsCurrentSituationRepeated()const
 {
 	for (auto& i : situationHistory)
@@ -454,7 +483,7 @@ Action Tree::deepSearch(int depthTotal, Action* recommendAction)
 	{
 		actionCandidate.push_back(*recommendAction);
 	}
-	appendGoodActionCandidate(aiChessCandidate, actionCandidate);
+	appendSortedActionCandidate(aiChessCandidate, actionCandidate);
 	int value = 0;
 	bool hasPVValue = false;
 	for (auto& action : actionCandidate)
@@ -559,7 +588,7 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 	updateTime();
 	if (timeOver)
 	{
-		return  getEstimatedValue(Black);
+		return  getEstimatedValue();
 	}
 	bool hasPVValue = false;
 	SimpleList<Action, 100> actionCandidate;
@@ -567,7 +596,7 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 	{
 		actionCandidate.push_back(result->bestAction);
 	}
-	appendGoodActionCandidate(aiChessCandidate, actionCandidate);
+	appendSortedActionCandidate(aiChessCandidate, actionCandidate);
 	Action bestAction = actionCandidate[0];
 	int value = 0;
 	for (auto& action : actionCandidate)
@@ -670,7 +699,7 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 	updateTime();
 	if (timeOver)
 	{
-		return  getEstimatedValue(Red);
+		return  getEstimatedValue();
 	} 
 	bool hasPVValue = false;
 	SimpleList<Action, 100> actionCandidate;
@@ -678,7 +707,7 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 	{
 		actionCandidate.push_back(result->bestAction);
 	}
-	appendGoodActionCandidate(playerChessCandidate, actionCandidate);
+	appendSortedActionCandidate(playerChessCandidate, actionCandidate);
 	Action bestAction = actionCandidate[0];
 	int value = 0;
 	for (auto& action : actionCandidate)
@@ -726,7 +755,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	if (aiKingChess->type == None)
 	{
 		return minimumValue + depthCurrent;
-	}
+	} 
 	if (checkIsCurrentSituationRepeated())
 	{
 		return maximumValue;
@@ -744,7 +773,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	updateTime();
 	if (timeOver)
 	{
-		return  getEstimatedValue(Black);
+		return  getEstimatedValue();
 	}	
 	//SimpleList<Action, 100> assaultedActionCandidate;
 	//appendAssaultableActionCandidate(playerChessCandidate, assaultedActionCandidate);
@@ -760,7 +789,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	//} 
 
 	////alpha = std::max(alpha, getEstimatedValue());
-	auto estimatevalue = getEstimatedValue(Black)  ;
+	auto estimatevalue = getEstimatedValue()  ;
 	if (estimatevalue > alpha)
 	{
 		alpha = estimatevalue;
@@ -773,15 +802,20 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	if (isKingSafe(Black))
 	{
 		appendAssaultableActionCandidate(aiChessCandidate, actionCandidate);
-		//appendAssaultableGoodActionCandidate(aiChessCandidate, actionCandidate);
+		//appendSortedAssaultableActionCandidate(aiChessCandidate, actionCandidate);
+		if (actionCandidate.empty())
+		{
+			return estimatevalue;
+		}
 	}
 	else
 	{
-		appendAllActionCandidate(aiChessCandidate, actionCandidate);
-	}
-	if (actionCandidate.empty())
-	{
-		return estimatevalue;
+		//appendAllActionCandidate(aiChessCandidate, actionCandidate);
+		appendSafeActionCandidate(Black, actionCandidate);
+		if (actionCandidate.empty())
+		{
+			return minimumValue + depthCurrent;
+		}
 	}
 	int value = 0;
 	for (auto& action : actionCandidate)
@@ -810,11 +844,11 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	if (playerKingChess->type == None)
 	{
 		return maximumValue - depthCurrent;
-	}
-	if (checkIsCurrentSituationRepeated())
-	{
-		return minimumValue;
 	} 
+	//if (checkIsCurrentSituationRepeated()) //soft limitation
+	//{
+	//	return minimumValue;
+	//} 
 	//if (depth >= 5)
 	//{
 	//	return getEstimatedValue();
@@ -827,7 +861,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	updateTime();
 	if (timeOver)
 	{
-		return getEstimatedValue(Red);
+		return getEstimatedValue();
 	}
 	//SimpleList<Action, 100> assaultedActionCandidate;
 	//appendAssaultableActionCandidate(aiChessCandidate, assaultedActionCandidate);
@@ -846,7 +880,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 
 	int value = 0;
 	//beta = std::min(beta, getEstimatedValue());
-	auto estimateValue = getEstimatedValue(Red) ;
+	auto estimateValue = getEstimatedValue();
 	if (estimateValue < beta)
 	{
 		beta = estimateValue;
@@ -859,15 +893,20 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	if (isKingSafe(Red))
 	{
 		appendAssaultableActionCandidate(playerChessCandidate, actionCandidate);
-		//appendAssaultableGoodActionCandidate(playerChessCandidate, actionCandidate);
+		//appendSortedAssaultableActionCandidate(playerChessCandidate, actionCandidate);
+		if (actionCandidate.empty())
+		{
+			return estimateValue;
+		}
 	}
 	else
 	{
-		appendAllActionCandidate(playerChessCandidate, actionCandidate);
-	}
-	if (actionCandidate.empty())
-	{
-		return estimateValue;
+		//appendAllActionCandidate(playerChessCandidate, actionCandidate);
+		appendSafeActionCandidate(Red, actionCandidate);
+		if (actionCandidate.empty())
+		{
+			return  maximumValue - depthCurrent;
+		}
 	}
 	for (auto& action : actionCandidate)
 	{
@@ -900,14 +939,14 @@ int Tree::quiescentMinWithDelta(int alpha, int beta, int standardValue)
 	{
 		return minimumValue;
 	}
-	auto currentValue = getEstimatedValue(Red);
+	auto currentValue = getEstimatedValue();
 	updateTime();
 	if (timeOver)
 	{
 		return currentValue;
 	} 
 	SimpleList<Action, 100> actionCandidate;
-	appendGoodActionCandidate(playerChessCandidate, actionCandidate);    
+	appendSortedActionCandidate(playerChessCandidate, actionCandidate);    
 	for (auto& action : actionCandidate)
 	{
 		doAction(action);
@@ -935,14 +974,14 @@ int Tree::quiescentMaxWithDelta(int alpha, int beta, int standardValue)
 	{
 		return minimumValue;
 	}
-	auto currentValue = getEstimatedValue(Black);
+	auto currentValue = getEstimatedValue();
 	updateTime();
 	if (timeOver)
 	{
 		return currentValue;
 	} 
 	SimpleList<Action, 100> actionCandidate;
-	appendGoodActionCandidate(aiChessCandidate, actionCandidate);
+	appendSortedActionCandidate(aiChessCandidate, actionCandidate);
 	for (auto& action : actionCandidate)
 	{
 		doAction(action);
