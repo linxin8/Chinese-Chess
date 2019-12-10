@@ -165,7 +165,7 @@ int Tree::getEstimatedValue(ChessCountry currentTurnCountry)
 	//{ 
 	//	return it->second;
 	//}
-	auto value = root.getEstimatedValue(aiChessCandidate, playerChessCandidate, currentTurnCountry);
+	auto value = root.getEstimatedValue(aiChessCandidate, playerChessCandidate);
 	//map[rootHashValue] = value; 
 	return value;
 }
@@ -273,9 +273,9 @@ void Tree::appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, 
 	if (actionCandidate.length > 0)
 	{
 		int newSize = actionCandidate.length;
-		if (newSize > 15)
+		if (newSize > 100)
 		{
-			newSize -= (actionCandidate.length - 15) / 2;
+			newSize -= (actionCandidate.length - 30) / 2;
 		}
 		std::pair<int, int> value[100]; 
 		for (int i = lengthLast; i < actionCandidate.length; i++)

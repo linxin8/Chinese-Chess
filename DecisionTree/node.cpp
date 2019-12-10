@@ -365,29 +365,19 @@ struct __InitPositionValue
 	}
 }__initPositionValue;
 
-int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate,ChessCountry currentCountry)
-{ 
+int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate)
+{
 	int totalValue = 0;
-	char confilictMap[10][9]{}; 
-	//char threatenMap[10][9]{};
-	//SimpleList<ChessTarget*, 16> aiTarget;
-	//SimpleList<ChessTarget*, 16> playerTarget;
+	char confilictMap[10][9]{};
 	for (auto& chess : aiCandidate)
 	{
 		auto type = chess->type;
 		if (type != None)
 		{
 			auto target = chess->getTarget();
-			//aiTarget.push_back(target);
-			for(auto& p : target->assaultableList) 
+			for (auto& p : target->assaultableList)
 			{
 				confilictMap[p->y][p->x] += 1;
-				//threatenMap[p->y][p->x] += 1;
-				//auto targetType = board[p->x][p->y].chess->type;
-				//if (targetType != None)
-				//{
-				//	totalValue += chessValue[targetType] >> 5;
-				//} 
 			}
 			for (auto& p : target->defendableList)
 			{
@@ -404,19 +394,12 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 		if (type != None)
 		{
 			auto target = chess->getTarget();
-			//playerTarget.push_back(target);
-			for (auto& p : target->assaultableList) 
-			{ 
+			for (auto& p : target->assaultableList)
+			{
 				confilictMap[p->y][p->x] += 1;
-				//threatenMap[p->y][p->x] += 1;
-				//auto targetType = board[p->x][p->y].chess->type;
-				//if (targetType != None)
-				//{
-				//	totalValue -= chessValue[targetType] >> 5;
-				//}
 			}
 			for (auto& p : target->defendableList)
-			{ 
+			{
 				confilictMap[p->y][p->x] -= 1;
 			}
 			totalValue -= positionValue[Red][type][chess->py][chess->px];
@@ -424,166 +407,26 @@ int Node::getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::v
 			totalValue -= target->moveableList.length << moveShiftValue[type];
 		}
 	}
-
-	//for (auto& target : aiTarget)
-	//{
-	//	for (int i = 0; i < target->assaultableList.length; i++)
-	//	{
-	//		auto& p = target->assaultableList.position[i]; 
-	//		confilictMap[p->y][p->x] += 1; 
-	//		//threatenMap[p->y][p->x] += 1;
-	//	}
-	//	for (int i = 0; i < target->defendableList.length; i++)
-	//	{
-	//		auto& p = target->defendableList.position[i];
-	//		confilictMap[p->y][p->x] -= 1;
-	//	}
-	//}
-
-	//for (auto& target : playerTarget)
-	//{
-	//	for (int i = 0; i < target->assaultableList.length; i++)
-	//	{
-	//		auto& p = target->assaultableList.position[i];
-	//		confilictMap[p->y][p->x] += 1;
-	//		//threatenMap[p->y][p->x] += 1;
-	//	}
-	//	for (int i = 0; i < target->defendableList.length; i++)
-	//	{
-	//		auto& p = target->defendableList.position[i];
-	//		confilictMap[p->y][p->x] -= 1;
-	//	}
-	//} 
-	if (currentCountry == Black)
+	for (auto& chess : aiCandidate)
 	{
-		for (auto&chess : aiCandidate)
-		{//sente
-			if (chess->type != None)
+		if (chess->type != None)
+		{
+			if (confilictMap[chess->py][chess->px] > 0)
 			{
-				if (confilictMap[chess->py][chess->px] > 0)
-				{
-					totalValue -= chessConfilictValueSente[chess->type];
-				}
-				//if (threatenMap[y][x] > 0)
-				//{
-				//	totalValue -= chessValue[chess->type] / 8 * threatenMap[y][x];
-				//}
-			}
-		}
-		for (auto&chess : playerCandidate)
-		{//gote
-			if (chess->type != None)
-			{
-				if (confilictMap[chess->py][chess->px] > 0)
-				{
-					totalValue += chessConfilictValueGote[chess->type];
-				}
-				//if (threatenMap[y][x] > 0)
-				//{
-				//	totalValue += chessValue[chess->type] / 8 * threatenMap[y][x];
-				//}
+				totalValue -= chessConfilictValueSente[chess->type];
 			}
 		}
 	}
-	else
+	for (auto& chess : playerCandidate)
 	{
-		for (auto&chess : aiCandidate)
-		{//gote
-			if (chess->type != None)
+		if (chess->type != None)
+		{
+			if (confilictMap[chess->py][chess->px] > 0)
 			{
-				if (confilictMap[chess->py][chess->px] > 0)
-				{
-					totalValue -= chessConfilictValueGote[chess->type];
-				}
-				//if (threatenMap[y][x] > 0)
-				//{
-				//	totalValue -= chessValue[chess->type] / 8 * threatenMap[y][x];
-				//}
-			}
-		}
-		for (auto&chess : playerCandidate)
-		{//sente
-			if (chess->type != None)
-			{
-				if (confilictMap[chess->py][chess->px] > 0)
-				{
-					totalValue += chessConfilictValueSente[chess->type];
-				}
-				//if (threatenMap[y][x] > 0)
-				//{
-				//	totalValue += chessValue[chess->type] / 8 * threatenMap[y][x];
-				//}
+				totalValue += chessConfilictValueSente[chess->type];
 			}
 		}
 	}
-
-
-	//for (auto& target : aiTarget)
-	//{ 
-	//	for (int i = 0; i < target->assaultableList.length; i++)
-	//	{
-	//		auto& p = target->assaultableList.position[i];
-	//		auto v = confilictMap[p->y][p->x];
-	//		if (v == 0)
-	//		{
-	//			totalValue += chessValue[p->chess->type] * 2 / 3;
-	//		}
-	//		else
-	//		{
-	//			totalValue += chessValue[p->chess->type] / (2 + v);
-	//		} 
-	//	} 
-	//}
-	//for (auto& target : playerTarget)
-	//{ 
-	//	for (int i = 0; i < target->assaultableList.length; i++)
-	//	{
-	//		auto& p = target->assaultableList.position[i]; 
-	//		auto v = confilictMap[p->y][p->x];
-	//		if (v == 0)
-	//		{
-	//			totalValue -= chessValue[p->chess->type] * 2 / 3;
-	//		}
-	//		else
-	//		{
-	//			totalValue -= chessValue[p->chess->type] / (2 + v);
-	//		}
-	//	} 
-	//}  
-	//for (auto chess : aiCandidate)
-	//{
-	//	auto type = chess->type;
-	//	if (type != None)
-	//	{ 
-	//		int value = 0;
-	//		auto target = chess->getTarget();
-	//		auto& assaultableList = target->assaultableList;
-	//		for (int i = 0; i < assaultableList.length; i++)
-	//		{
-	//			value += chessValue[assaultableList.position[i]->chess->type] >> 2;
-	//		}
-	//		value += positionValue[Black][type][chess->py][chess->px];
-	//		value += chessValue[type];
-	//		totalValue += value; 
-	//	}
-	//} 
-	//for (auto chess : playerCandidate)
-	//{
-	//	auto type = chess->type;
-	//	if (type != None)
-	//	{ 
-	//		int value = 0;
-	//		auto target = chess->getTarget();
-	//		auto& assaultableList = target->assaultableList;
-	//		for (int i = 0; i < assaultableList.length; i++)
-	//		{
-	//			value += chessValue[assaultableList.position[i]->chess->type] >> 2;
-	//		}
-	//		value += positionValue[Black][type][chess->py][chess->px];
-	//		value += chessValue[type];
-	//		totalValue -= value; 
-	//	}
-	//} 
 	return totalValue;
 }
 

@@ -8,7 +8,7 @@ public:
 	Node(int state[10][9]);
 	~Node();
 	void loadBoard(int state[10][9]);
-	int getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate, ChessCountry currentCountry);
+	int getEstimatedValue(const std::vector<Chess*>& aiCandidate, const std::vector<Chess*>& playerCandidate);
 	bool isNoneChess(int x, int y) { return board[y][x].chess->type == None; }
 	bool isHostile(int x, int y, ChessCountry country) { return board[y][x].chess->country != country; }
 	Position getStep(const Node& des, const Position& from)const;
