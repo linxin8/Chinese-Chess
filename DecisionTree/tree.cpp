@@ -273,9 +273,9 @@ void Tree::appendGoodActionCandidate(const std::vector<Chess*>& chessCandidate, 
 	if (actionCandidate.length > 0)
 	{
 		int newSize = actionCandidate.length;
-		if (newSize > 20)
+		if (newSize > 15)
 		{
-			newSize -= (actionCandidate.length - 20) / 3;
+			newSize -= (actionCandidate.length - 15) / 2;
 		}
 		std::pair<int, int> value[100]; 
 		for (int i = lengthLast; i < actionCandidate.length; i++)
@@ -332,41 +332,42 @@ void Tree::appendAssaultableGoodActionCandidate(const std::vector<Chess*>& chess
 				actionCandidate.push_back(actionTemp);
 			}
 		}
-	} 	 
+	}
+	//std::cout << actionCandidate.length << '\n';
 	if (actionCandidate.length > 0)
 	{
-		std::pair<int, int> value[100];
-		int sum = 0;
+		int newSize = actionCandidate.length;
+		if (newSize > 2)
+		{
+			newSize -= (actionCandidate.length - 2) / 2;
+		}
+		std::pair<int, int> value[20];
 		for (int i = lengthLast; i < actionCandidate.length; i++)
 		{
 			doAction(actionCandidate[i]);
-			value[i].first = getEstimatedValue(currentTurnCountry == Black ? Red : Black);// to do
-			sum += value[i].first;
+			value[i].first = getEstimatedValue(currentTurnCountry == Black ? Red : Black);
 			value[i].second = i;
 			undoAction();
 		}
 		if (currentTurnCountry == Black)
 		{
-			std::sort(value + lengthLast, value + actionCandidate.length, std::greater<std::pair<int, int>>());
+			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::greater<std::pair<int, int>>());
 		}
 		else
 		{
-			std::sort(value + lengthLast, value + actionCandidate.length, std::less<std::pair<int, int>>());
+			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::less<std::pair<int, int>>());
 		}
-		Action temp[100];
-		for (int i = lengthLast; i < actionCandidate.length; i++)
+		Action temp[20];
+		for (int i = lengthLast; i < newSize; i++)
 		{
 			temp[i] = actionCandidate[value[i].second];
 		}
-		for (int i = lengthLast; i < actionCandidate.length; i++)
+		for (int i = lengthLast; i < newSize; i++)
 		{
 			actionCandidate[i] = temp[i];
 		}
-		if (actionCandidate.length > 20)
-		{
-			actionCandidate.length -= (actionCandidate.length - 20) / 2;
-		}
-	} 
+		actionCandidate.length = newSize;
+	}
 }
 
 void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
@@ -397,11 +398,11 @@ void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCand
 	//	}
 	//	return chessValue[a.coveredChessType] - chessValue[a.from->chess->type] > chessValue[b.coveredChessType] - chessValue[b.from->chess->type];
 	//});
-	std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(), [](Action&a, Action&b)
-	{
-		constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 10 };
-		return chessPriority[a.coveredChessType] > chessPriority[a.coveredChessType];
-	});
+	//std::sort(actionCandidate.begin() + lengthLast, actionCandidate.end(), [](Action&a, Action&b)
+	//{
+	//	constexpr int chessPriority[8] = { 0, 1, 3, 4, 3, 2, 2, 10 };
+	//	return chessPriority[a.coveredChessType] > chessPriority[a.coveredChessType];
+	//});
 }
 
 bool Tree::checkIsCurrentSituationRepeated()const
@@ -772,6 +773,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	if (isKingSafe(Black))
 	{
 		appendAssaultableActionCandidate(aiChessCandidate, actionCandidate);
+		//appendAssaultableGoodActionCandidate(aiChessCandidate, actionCandidate);
 	}
 	else
 	{
@@ -779,7 +781,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	}
 	if (actionCandidate.empty())
 	{
-		return getEstimatedValue(Black);
+		return estimatevalue;
 	}
 	int value = 0;
 	for (auto& action : actionCandidate)
@@ -857,6 +859,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	if (isKingSafe(Red))
 	{
 		appendAssaultableActionCandidate(playerChessCandidate, actionCandidate);
+		//appendAssaultableGoodActionCandidate(playerChessCandidate, actionCandidate);
 	}
 	else
 	{
@@ -864,7 +867,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	}
 	if (actionCandidate.empty())
 	{
-		return getEstimatedValue(Red);
+		return estimateValue;
 	}
 	for (auto& action : actionCandidate)
 	{
