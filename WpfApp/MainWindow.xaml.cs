@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,10 +21,10 @@ namespace ChessGame
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     public partial class MainWindow : Window
-    {
-        private LogicMap logicMap = new LogicMap();
+    { 
         private Chess lastSelectedChess = null;
-
+        private bool isPlayerTurn=true;
+        private LogicMap logicMap=new LogicMap();
 
         public MainWindow()
         {
@@ -125,8 +126,12 @@ namespace ChessGame
             Board.BoardMouseUp += OnBorderMouseUp; 
         }
 
+        private void OnAITurnEnd(Position firstPosition, Position secondPosition)
+        { 
+        }
+
         private void OnAITurn()
-        {
+        { 
             var dllMap = logicMap.GetDLLMap();
             DecisionTreeDll.GetDecision(dllMap, out DecisionTreeDllDecision decision);
             var firstPosition = new Position
@@ -139,11 +144,21 @@ namespace ChessGame
                 x = decision.desX,
                 y = decision.desY,
             };
-            logicMap.MoveChess(firstPosition, secondPosition);
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                (ThreadStart)delegate ()
+                {
+                    logicMap.MoveChess(firstPosition, secondPosition);
+                    isPlayerTurn = true; 
+                    Board.HighlightedPostion = secondPosition;
+                });
         }
 
         private void OnBorderMouseUp(int x, int y)
         {
+            if(!isPlayerTurn)
+            {
+                return;
+            }
             var chess = logicMap.GetChess(x, y);
             var mousePosition = new Position { x = x, y = y };
             if (lastSelectedChess == null)
@@ -167,17 +182,23 @@ namespace ChessGame
                     var positions = DecisionTreeDll.GetAccessiblePosition(logicMap.GetDLLMap(), lastSelectedChess.Position.x, lastSelectedChess.Position.y);
                     if (positions.Contains(mousePosition))
                     {// move chess 
+                        isPlayerTurn = false;
                         logicMap.MoveChess(lastSelectedChess.Position, mousePosition);
                         Board.SelectedPostion = null;
                         Board.HintedPosition = null;
+                        Board.HighlightedPostion = mousePosition;
                         lastSelectedChess = null;
-                        OnAITurn();
+                        logicMap.ForceTriggerMapUpdate();  
+                        var thr = new Thread(new ThreadStart(OnAITurn));
+                        thr.Start();
+                        
                     }
                     else
                     {// unselect chess 
                         Board.SelectedPostion = null;
                         Board.HintedPosition = null;
                         lastSelectedChess = null;
+                        Board.HighlightedPostion = null;
                     }
                 }
                 else
@@ -190,21 +211,29 @@ namespace ChessGame
                         {// unselect chess 
                             Board.SelectedPostion = null;
                             Board.HintedPosition = null;
+                            Board.HighlightedPostion = null;
                             lastSelectedChess = null;
                         }
                         else
                         {// capture chess 
+                            isPlayerTurn = false;
                             logicMap.MoveChess(lastSelectedChess.Position, mousePosition);
                             Board.SelectedPostion = null;
                             Board.HintedPosition = null;
+                            Board.HighlightedPostion = mousePosition;
                             lastSelectedChess = null;
-                            OnAITurn();
+                            logicMap.ForceTriggerMapUpdate();
+                            Board.UpdateViewCentent(logicMap.ChessMap); 
+                            var thr = new Thread(new ThreadStart(OnAITurn));
+                            thr.Start(); 
+
                         }
                     }
                     else
                     {// unselect chess 
                         Board.SelectedPostion = null;
                         Board.HintedPosition = null;
+                        Board.HighlightedPostion = null;
                         lastSelectedChess = null;
                     }
                 } 

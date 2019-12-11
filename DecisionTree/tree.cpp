@@ -324,36 +324,36 @@ void Tree::appendSortedAssaultableActionCandidate(const std::vector<Chess*>& che
 		}
 	}
 	//std::cout << actionCandidate.length << '\n';
-	if (actionCandidate.length > 0)
-	{
-		int newSize = actionCandidate.length; 
-		std::pair<int, int> value[20];
-		for (int i = lengthLast; i < actionCandidate.length; i++)
-		{
-			doAction(actionCandidate[i]);
-			value[i].first = getEstimatedValue();
-			value[i].second = i;
-			undoAction();
-		}
-		if (currentTurnCountry == Black)
-		{
-			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::greater<std::pair<int, int>>());
-		}
-		else
-		{
-			std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::less<std::pair<int, int>>());
-		}
-		Action temp[20];
-		for (int i = lengthLast; i < newSize; i++)
-		{
-			temp[i] = actionCandidate[value[i].second];
-		}
-		for (int i = lengthLast; i < newSize; i++)
-		{
-			actionCandidate[i] = temp[i];
-		}
-		actionCandidate.length = newSize;
-	}
+	//if (actionCandidate.length > 0)
+	//{
+	//	int newSize = actionCandidate.length; 
+	//	std::pair<int, int> value[20];
+	//	for (int i = lengthLast; i < actionCandidate.length; i++)
+	//	{
+	//		doAction(actionCandidate[i]);
+	//		value[i].first = getEstimatedValue();
+	//		value[i].second = i;
+	//		undoAction();
+	//	}
+	//	if (currentTurnCountry == Black)
+	//	{
+	//		std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::greater<std::pair<int, int>>());
+	//	}
+	//	else
+	//	{
+	//		std::partial_sort(value + lengthLast, value + newSize, value + actionCandidate.length, std::less<std::pair<int, int>>());
+	//	}
+	//	Action temp[20];
+	//	for (int i = lengthLast; i < newSize; i++)
+	//	{
+	//		temp[i] = actionCandidate[value[i].second];
+	//	}
+	//	for (int i = lengthLast; i < newSize; i++)
+	//	{
+	//		actionCandidate[i] = temp[i];
+	//	}
+	//	actionCandidate.length = newSize;
+	//}
 }
 
 void Tree::appendAssaultableActionCandidate(const std::vector<Chess*>& chessCandidate, SimpleList<Action, 100>& actionCandidate)
@@ -564,7 +564,8 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 		return quiescentMax(alpha, beta);
 		//return quiescentMaxWithDelta(alpha, beta, beta);
 	}  
-	if (isKingSafe(Black))
+	bool isSafe = isKingSafe(Black);
+	if (isSafe)
 	{
 		auto R = depthLeft > 6 ? 4 : 3;
 		//auto value = deepSearchMin(depthLeft - R - 1, alpha, beta);
@@ -598,8 +599,15 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 	{
 		actionCandidate.push_back(result->bestAction);
 	}
-	appendSortedActionCandidate(aiChessCandidate, actionCandidate);
-	Action bestAction = actionCandidate[0];
+	if (isSafe)
+	{
+		appendSortedActionCandidate(aiChessCandidate, actionCandidate); 
+	}
+	else
+	{
+		appendSafeActionCandidate(Black, actionCandidate);
+	}
+	Action bestAction{ nullptr,nullptr,None };
 	int value = 0;
 	for (auto& action : actionCandidate)
 	{ 
@@ -636,7 +644,10 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 			bestAction = action;
 		}
 	}
-	aiResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Alpha,alpha,bestAction }); 
+	if (bestAction.from != nullptr)
+	{ 
+		aiResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Alpha,alpha,bestAction });
+	}
 	return alpha;
 } 
 
@@ -674,7 +685,8 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 		return quiescentMin(alpha, beta);
 		//return quiescentMinWithDelta(alpha, beta, alpha);
 	} 
-	if (isKingSafe(Red))
+	const bool isSafe = isKingSafe(Red);
+	if (isSafe)
 	{
 		auto R = depthLeft > 6 ? 4 : 3;
 		//auto value = deepSearchMax(depthLeft - R - 1, alpha, beta);
@@ -709,8 +721,15 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 	{
 		actionCandidate.push_back(result->bestAction);
 	}
-	appendSortedActionCandidate(playerChessCandidate, actionCandidate);
-	Action bestAction = actionCandidate[0];
+	if (isSafe)
+	{
+		appendSortedActionCandidate(playerChessCandidate, actionCandidate); 
+	}
+	else
+	{
+		appendSafeActionCandidate(Red, actionCandidate);
+	}
+	Action bestAction{ nullptr,nullptr,None };
 	int value = 0;
 	for (auto& action : actionCandidate)
 	{
@@ -748,7 +767,10 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 			bestAction = action;
 		}
 	}
-	playerResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Beta,beta,bestAction });
+	if (bestAction.from != nullptr)
+	{
+		playerResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Beta,beta,bestAction });
+	}
 	return beta;
 }
 
