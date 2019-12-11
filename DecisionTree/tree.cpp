@@ -115,13 +115,13 @@ Decision* Tree::deepSearch()
 	Action lastBestAction;
 	int step = 2;
 	int stepIncrement = 2; 
-	maxThinkTime = 20000;
+	maxThinkTime = 2;
 	bool getAction = false;
 	int actionTotalCount = 0; 
 	for (; step < 20; step += stepIncrement)
 	{
 		depthMaxLast = 0;
-		depthMax = step + 8;
+		depthMax = step + 12;
 		lastTime = std::clock(); 
 		quiescentDepthMax = 6;
 		actionCount = 0;
@@ -543,21 +543,21 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 	//	return maximumValue;
 	//}
 	auto result = aiResultHash.getHash(rootHashValue); 
-	if (result != nullptr&&result->depth >= depthLeft)
-	{
-		if (result->type == SearchResult::PV)
-		{
-			return result->value;
-		}
-		if (result->type == SearchResult::Alpha&&result->value <= alpha)
-		{
-			return alpha;
-		}
-		if (result->type == SearchResult::Beta&&result->value >= beta)
-		{
-			return beta;
-		}
-	}
+	//if (result != nullptr&&result->depth >= depthLeft)
+	//{
+	//	if (result->type == SearchResult::PV)
+	//	{
+	//		return result->value;
+	//	}
+	//	if (result->type == SearchResult::Alpha&&result->value <= alpha)
+	//	{
+	//		return alpha;
+	//	}
+	//	if (result->type == SearchResult::Beta&&result->value >= beta)
+	//	{
+	//		return beta;
+	//	}
+	//}
 	if (depthLeft <= 0)
 	{
 		//return getEstimatedValue();
@@ -653,21 +653,21 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 		return minimumValue;
 	}
 	auto result = playerResultHash.getHash(rootHashValue);
-	if (result != nullptr&&result->depth >= depthLeft)
-	{
-		if (result->type == SearchResult::PV)
-		{
-			return result->value;
-		}
-		if (result->type == SearchResult::Alpha&&result->value <= alpha)
-		{
-			return alpha;
-		}		
-		if (result->type == SearchResult::Beta&&result->value >= beta)
-		{
-			return beta;
-		} 
-	}
+	//if (result != nullptr&&result->depth >= depthLeft)
+	//{
+	//	if (result->type == SearchResult::PV)
+	//	{
+	//		return result->value;
+	//	}
+	//	if (result->type == SearchResult::Alpha&&result->value <= alpha)
+	//	{
+	//		return alpha;
+	//	}		
+	//	if (result->type == SearchResult::Beta&&result->value >= beta)
+	//	{
+	//		return beta;
+	//	} 
+	//}
 	if (depthLeft <= 0)
 	{
 		//return getEstimatedValue();
@@ -818,6 +818,7 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 		{
 			return minimumValue + depthCurrent;
 		}
+		quiescentDepth -= 1;
 	}
 	int value = 0;
 	for (auto& action : actionCandidate)
@@ -909,6 +910,7 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 		{
 			return  maximumValue - depthCurrent;
 		}
+		quiescentDepth -= 1;
 	}
 	for (auto& action : actionCandidate)
 	{

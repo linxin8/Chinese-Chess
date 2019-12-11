@@ -97,20 +97,20 @@ namespace ChessGame
 //{00,00,22,00,22,00,24,00,00,}, 
 //{00,00,00,00,00,00,00,12,00,}, 
 //{00,23,25,26,27,26,25,00,00,},
-{00,00,00,16,17,16,15,00,00,},
-{14,00,13,00,00,00,00,00,00,},
-{00,00,00,00,15,00,14,00,13,},
-{11,00,00,00,00,24,23,00,11,},
-{00,00,00,00,11,00,00,00,00,},
-{00,00,00,00,00,24,00,00,00,},
-{12,00,00,00,21,00,00,00,21,},
-{00,00,22,00,00,00,00,00,00,},
-{00,00,00,00,26,00,00,00,00,},
-{00,23,25,26,27,00,00,00,00,},
+{00,13,15,16,17,16,00,00,00,},
+{00,00,00,00,00,00,00,00,00,},
+{00,00,00,00,15,00,00,23,00,},
+{11,12,00,00,11,00,00,13,11,},
+{00,12,11,00,00,00,00,00,00,},
+{21,00,00,00,00,24,00,00,00,},
+{00,00,21,00,21,00,00,00,21,},
+{24,00,22,00,22,00,00,00,00,},
+{00,00,00,00,00,00,00,00,00,},
+{00,00,25,26,27,26,25,00,00,},
             };
-            logicMap.LoadMap(testMap);
+            //logicMap.LoadMap(testMap);
             //            var dllMap = logicMap.GetDLLMap();
-            DecisionTreeDll.GetDecision(testMap, out DecisionTreeDllDecision decision);
+            //DecisionTreeDll.GetDecision(testMap, out DecisionTreeDllDecision decision);
             //var version = DecisionTreeDll.GetVersion();
             //var name = DecisionTreeDll.GetName(); 
             //Console.WriteLine($"{decision.fromX},{decision.fromY}->{decision.desX},{decision.desY}");
