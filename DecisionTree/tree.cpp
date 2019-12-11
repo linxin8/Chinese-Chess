@@ -115,7 +115,7 @@ Decision* Tree::deepSearch()
 	Action lastBestAction;
 	int step = 2;
 	int stepIncrement = 2; 
-	maxThinkTime = 2;
+	maxThinkTime = 20000;
 	bool getAction = false;
 	int actionTotalCount = 0; 
 	for (; step < 20; step += stepIncrement)
@@ -395,6 +395,8 @@ void Tree::appendSafeActionCandidate(ChessCountry currentTurnCountry, SimpleList
 {
 	Action actionTemp; 
 	auto& selfChess = (currentTurnCountry == Black) ? aiChessCandidate : playerChessCandidate;
+	appendSortedActionCandidate(selfChess, actionCandidate);
+	return;
 	for (size_t i = 0; i < selfChess.size(); i++)
 	{
 		if (selfChess[i]->type != None)
@@ -634,7 +636,7 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 			bestAction = action;
 		}
 	}
-	aiResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Alpha,alpha,bestAction });
+	aiResultHash.updateHash({ rootHashValue,depthLeft,hasPVValue ? SearchResult::PV : SearchResult::Alpha,alpha,bestAction }); 
 	return alpha;
 } 
 
@@ -736,7 +738,7 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 		if (value <= alpha)
 		{
 			bestAction = action;
-			playerResultHash.updateHash({ rootHashValue,depthLeft,SearchResult::Alpha,alpha,bestAction }); 
+			playerResultHash.updateHash({ rootHashValue,depthLeft,SearchResult::Alpha,alpha,bestAction });
 			return alpha;
 		}
 		else if (value < beta)
@@ -756,10 +758,10 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	{
 		return minimumValue + depthCurrent;
 	} 
-	if (checkIsCurrentSituationRepeated())
-	{
-		return maximumValue;
-	}
+	//if (checkIsCurrentSituationRepeated()) //useless
+	//{
+	//	return maximumValue;
+	//}
 	//auto baseValue = getEstimatedValue();
 	//if (depth >= 5)
 	//{
