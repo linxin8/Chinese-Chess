@@ -64,7 +64,7 @@ namespace ChessGame
             {
                 if (hintedPosition != null)
                 {
-                    foreach (var p in hintedPosition)uj
+                    foreach (var p in hintedPosition)
                     {
                         ResetBackgroundColor(p);
                     }
