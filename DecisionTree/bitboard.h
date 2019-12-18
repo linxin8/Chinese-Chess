@@ -46,8 +46,7 @@ enum ChessType
 namespace Action
 {
 	constexpr uint64_t fromIndexFlag = bitsAt(0, 1, 2, 3, 4, 5, 6, 7);
-	constexpr uint64_t desIndexFlag = bitsAt(8, 9, 10, 11, 12, 13, 14, 15);
-	constexpr uint64_t coveredTypeFlag = bitsAt(16, 17, 18);
+	constexpr uint64_t desIndexFlag = bitsAt(8, 9, 10, 11, 12, 13, 14, 15); 
 }
 
 enum ChessCountry
@@ -84,6 +83,25 @@ struct Debug
  
 class BitBoard
 {
+private: 
+	// chess info 0-31 bits
+	static constexpr uint64_t countryFlag = bitsAt(0);
+	static constexpr uint64_t typeFlag = bitsAt(1, 2, 3);
+	static constexpr uint64_t globalIdFlag = bitsAt(4, 5, 6, 7, 8);
+	static constexpr uint64_t typeIdFlag = bitsAt(9, 10, 11, 12);
+	static constexpr uint64_t aliveFlag = bitsAt(13);
+	static constexpr uint64_t chessInfoFlag = 0b11111111'11111111'11111111'11111111;
+	// chess position info 32-63 bits
+	static constexpr uint64_t indexFlag = bitsAt(32, 33, 34, 35, 36, 37, 38, 39);
+	static constexpr uint64_t legalFlag = bitsAt(40);
+	static constexpr uint64_t positionInfoFlag = 0b11111111'11111111'11111111'11111111'00000000'00000000'00000000'00000000;
+
+	static_assert((countryFlag & typeFlag & globalIdFlag & typeIdFlag & indexFlag & legalFlag) == 0ULL);
+	static_assert((chessInfoFlag & positionInfoFlag) == 0ULL);
+	// action
+	static constexpr uint64_t fromIndexFlag = bitsAt(0, 1, 2, 3, 4, 5, 6, 7);
+	static constexpr uint64_t desIndexFlag = bitsAt(8, 9, 10, 11, 12, 13, 14, 15);
+	static constexpr uint64_t captureFlag = bitsAt(16);
 public:
 #define SETTER_GETTER(x)												\
 	static constexpr uint64_t get_##x(uint64_t value)					\
@@ -102,6 +120,13 @@ public:
 	SETTER_GETTER(globalId);
 	SETTER_GETTER(typeId);
 	SETTER_GETTER(alive);
+	SETTER_GETTER(chessInfo);
+	SETTER_GETTER(positionInfo);
+// action
+	SETTER_GETTER(fromIndex);
+	SETTER_GETTER(desIndex); 
+	SETTER_GETTER(capture);
+
 #undef SETTER_GETTER   
 public:  
 	BitBoard(int map[10][9])
@@ -116,6 +141,82 @@ public:
 		initPawn();
 		load(map);
 		updateAllTarget();
+	}
+
+	void updateChess(uint64_t newChess)
+	{
+		auto index = get_desIndex(newChess);
+		auto globalId = get_globalId(newChess);
+		board[index] = newChess;
+		boardById[globalId] = newChess;
+	}
+
+	void doAction(uint64_t action)
+	{
+		doActionCount += 1;
+		actionStack.push_back(action);
+		auto fromIndex = get_fromIndex(action);
+		auto desIndex = get_desIndex(action);
+		auto fromChess = getChess(fromIndex);
+		auto fromType = get_type(fromChess);
+		auto desChess = getChess(desIndex);
+		auto desType = get_type(desChess);
+		Debug::assert(get_type(fromChess) != None &&
+			get_alive(fromChess));
+		Debug::assert(get_type(desChess) == None ||
+			!get_alive(desChess)||
+			get_country(fromChess) != get_country(desChess));
+		
+		auto fromChessInfo = get_chessInfo(fromChess);
+		auto fromPositionInfo = get_positionInfo(fromChess);
+		auto desChessInfo = get_chessInfo(desChess);
+		auto desPositionInfo = get_positionInfo(desChess);
+		auto newFromChess = fromChess;
+		auto newDesChess = desChess;
+		set_positionInfo(newFromChess, desPositionInfo);
+		set_positionInfo(newDesChess, fromPositionInfo);
+	
+		if (get_capture(action))
+		{
+			Debug::assert(desType != None && get_alive(desChess));
+			set_alive(newDesChess, false);
+		}
+		updateChess(newFromChess);
+		updateChess(newDesChess);
+	}
+
+	void undoAction()
+	{
+		Debug::assert(!actionStack.empty());
+		auto action = actionStack.back();
+		actionStack.pop_back();
+		auto fromIndex = get_fromIndex(action);
+		auto desIndex = get_desIndex(action);
+		auto fromChess = getChess(fromIndex);
+		auto fromType = get_type(fromChess);
+		auto desChess = getChess(desIndex);
+		auto desType = get_type(desChess);  
+		Debug::assert(get_type(desChess) != None &&
+			get_alive(desChess));
+		Debug::assert(get_type(fromChess) == None ||
+			!get_alive(desChess) ||
+			get_country(fromChess) != get_country(desChess));
+		 
+		auto fromChessInfo = get_chessInfo(fromChess);
+		auto fromPositionInfo = get_positionInfo(fromChess);
+		auto desChessInfo = get_chessInfo(desChess);
+		auto desPositionInfo = get_positionInfo(desChess);
+		auto newFromChess = fromChess;
+		auto newDesChess = desChess;
+		set_positionInfo(newFromChess, desPositionInfo);
+		set_positionInfo(newDesChess, fromPositionInfo);
+		if (get_capture(action))
+		{
+			Debug::assert(get_type(fromChess) != None && !get_alive(fromChess));
+			set_alive(newDesChess, false);
+		}
+		updateChess(newFromChess);
+		updateChess(newDesChess); 
 	}
 
 	void beforeUpdateTarget(uint64_t chess)
@@ -313,20 +414,6 @@ public:
 	}
 
 private:
-	// chess info 0-31 bits
-	static constexpr uint64_t countryFlag = bitsAt(0);
-	static constexpr uint64_t typeFlag = bitsAt(1, 2, 3);
-	static constexpr uint64_t globalIdFlag = bitsAt(4, 5, 6, 7, 8);
-	static constexpr uint64_t typeIdFlag = bitsAt(9, 10, 11, 12);
-	static constexpr uint64_t aliveFlag = bitsAt(13);
-	static constexpr uint64_t chessInfoMask = 0b11111111'11111111'11111111'11111111;
-	// chess position info 32-63 bits
-	static constexpr uint64_t indexFlag = bitsAt(32, 33, 34, 35, 36, 37, 38, 39);
-	static constexpr uint64_t legalFlag = bitsAt(40);
-	static constexpr uint64_t chessPositionInfoMask = 0b11111111'11111111'11111111'11111111'00000000'00000000'00000000'00000000;
-
-	static_assert((countryFlag & typeFlag & globalIdFlag & typeIdFlag & indexFlag & legalFlag) == 0ULL);
-	static_assert((chessInfoMask & chessPositionInfoMask) == 0ULL);
 	static constexpr uint64_t countFlagIndex(uint64_t flag)
 	{
 		int counter = 0;
@@ -841,4 +928,6 @@ private:
 	uint64_t boardById[32];
 	static constexpr int blackKingGlobalId = 0;
 	static constexpr int redKingGlobalId = 1;
+	SimpleList<uint64_t, 100> actionStack;
+	int doActionCount = 0;
 };
