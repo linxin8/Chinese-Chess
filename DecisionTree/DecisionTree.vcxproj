@@ -84,6 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,6 +110,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -117,17 +119,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bitboard.h" />
+    <ClInclude Include="bittree.h" />
     <ClInclude Include="chess.h" />
     <ClInclude Include="chessPosition.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="dllfunction.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="estimate.h" />
     <ClInclude Include="hash.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="tree.h" />
     <ClInclude Include="trick.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bitboard.cpp" />
+    <ClCompile Include="bittree.cpp" />
     <ClCompile Include="chess.cpp" />
     <ClCompile Include="chessPosition.cpp" />
     <ClCompile Include="common.cpp" />

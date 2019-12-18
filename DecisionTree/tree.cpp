@@ -48,8 +48,8 @@ Tree::Tree(int state[10][9]):root(state)
 	auto cmp = [&chessPriority](Chess* a, Chess*  b) {return chessPriority[a->type] > chessPriority[b->type]; };
 	std::sort(aiChessCandidate.begin(), aiChessCandidate.end(), cmp);
 	std::sort(playerChessCandidate.begin(), playerChessCandidate.end(), cmp);
-	aiChessCount = aiChessCandidate.size();
-	playerChessCount = playerChessCandidate.size();
+	aiChessCount = (int)aiChessCandidate.size();
+	playerChessCount = (int)playerChessCandidate.size();
 	for (int i = 0; i < aiChessCount; i++)
 	{
 		for (int j = 0; j < playerChessCount; j++)
@@ -543,21 +543,33 @@ int Tree::deepSearchMax(int depthLeft, int alpha, int beta)
 	//	return maximumValue;
 	//}
 	auto result = aiResultHash.getHash(rootHashValue); 
-	//if (result != nullptr&&result->depth >= depthLeft)
-	//{
-	//	if (result->type == SearchResult::PV)
-	//	{
-	//		return result->value;
-	//	}
-	//	if (result->type == SearchResult::Alpha&&result->value <= alpha)
-	//	{
-	//		return alpha;
-	//	}
-	//	if (result->type == SearchResult::Beta&&result->value >= beta)
-	//	{
-	//		return beta;
-	//	}
-	//}
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		if (result->type == SearchResult::PV)
+		{
+			//if (result->value <= alpha)
+			//{
+			//	return alpha;
+			//}
+			//if (result->value >= beta)
+			//{
+			//	return beta;
+			//}
+			return result->value;
+		}
+		if (result->type == SearchResult::Alpha)
+		{
+			beta = std::min(beta, result->value);  
+		}
+		if (result->type == SearchResult::Beta)
+		{ 
+			alpha = std::max(alpha, result->value);
+		}
+		if (alpha >= beta)
+		{
+			return result->value;
+		}
+	}
 	if (depthLeft <= 0)
 	{
 		//return getEstimatedValue();
@@ -664,21 +676,41 @@ int Tree::deepSearchMin(int depthLeft, int alpha, int beta)
 		return minimumValue;
 	}
 	auto result = playerResultHash.getHash(rootHashValue);
-	//if (result != nullptr&&result->depth >= depthLeft)
+	if (result != nullptr&&result->depth >= depthLeft)
+	{
+		if (result->type == SearchResult::PV)
+		{
+		//	if (result->value <= alpha)
+		//	{
+		//		return alpha;
+		//	}
+		//	if (result->value >= beta)
+		//	{
+		//		return beta;
+		//	} 
+			return result->value;
+		}
+		if (result->type == SearchResult::Alpha)
+		{
+			beta = std::min(beta, result->value);
+		}
+		if (result->type == SearchResult::Beta)
+		{
+			alpha = std::max(alpha, result->value);
+		}
+		if (alpha >= beta)
+		{
+			return result->value;
+		}
+	}
+	//if (result->type == SearchResult::Alpha&&result->value <= alpha)
 	//{
-	//	if (result->type == SearchResult::PV)
-	//	{
-	//		return result->value;
-	//	}
-	//	if (result->type == SearchResult::Alpha&&result->value <= alpha)
-	//	{
-	//		return alpha;
-	//	}		
-	//	if (result->type == SearchResult::Beta&&result->value >= beta)
-	//	{
-	//		return beta;
-	//	} 
-	//}
+	//	return alpha;
+	//}		
+	//if (result->type == SearchResult::Beta&&result->value >= beta)
+	//{
+	//	return beta;
+	//} 
 	if (depthLeft <= 0)
 	{
 		//return getEstimatedValue();
@@ -846,11 +878,11 @@ int Tree::quiescentMax(int alpha, int beta, int quiescentDepth)
 	for (auto& action : actionCandidate)
 	{
 		doAction(action);
-		auto value = quiescentMin(alpha, alpha + 1, quiescentDepth + 1);
-		if (value > alpha)
-		{
+		//auto value = quiescentMin(alpha, alpha + 1, quiescentDepth + 1);
+		//if (value > alpha)
+		//{
 			value = quiescentMin(alpha, beta, quiescentDepth + 1);
-		} 
+		//} 
 		undoAction(); 
 		if (value >= beta)
 		{  
@@ -937,11 +969,11 @@ int Tree::quiescentMin(int alpha, int beta, int quiescentDepth)
 	for (auto& action : actionCandidate)
 	{
 		doAction(action); 
-		value = quiescentMax(beta - 1, beta, quiescentDepth + 1);
-		if (value < beta)
-		{
+		//value = quiescentMax(beta - 1, beta, quiescentDepth + 1);
+		//if (value < beta)
+		//{
 			value = quiescentMax(alpha, beta, quiescentDepth + 1);
-		} 
+		//} 
 		undoAction();
 		if (value <= alpha)
 		{ 

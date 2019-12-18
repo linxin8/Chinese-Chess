@@ -42,6 +42,15 @@
     <ClInclude Include="trick.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="bitboard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bittree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="estimate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllfunction.cpp">
@@ -66,6 +75,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="hash.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bitboard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bittree.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

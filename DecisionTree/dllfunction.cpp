@@ -1,6 +1,8 @@
 #include <iostream>
 #include "dllfunction.h"
-#include "tree.h"
+//#include "tree.h"
+#include"bittree.h"
+ 
  
 const char* getName()
 {
@@ -19,27 +21,32 @@ void DLL_init()
 
 void getDecision(int map[10][9], Decision* d)
 {
-	DLL_init(); 
-	Tree tree(map);
-	*d = *tree.deepSearch();
+	//DLL_init(); 
+	//Tree tree(map);
+	//*d = *tree.deepSearch();
 }
 
 void getAccessiblePosition(int map[10][9], int x, int y, PositionList* positionList)
 {
 	DLL_init();
-	Tree tree(map);
+	//Tree tree(map);
+	//auto target = tree.getTarget(x, y);   
+	BitTree tree(map); 
+	std::cout << tree.getEstimatedValue() << '\n';
 	auto target = tree.getTarget(x, y);
 	int length = 0; 
-	for (auto& p : target->assaultableList)
+	for (auto& p : target.assaultableList)
 	{ 
-		positionList->x[length] = p->x;
-		positionList->y[length] = p->y;
+		auto index = BitBoard::get_index(p);
+		positionList->x[length] = (int)(index % 16 - 3);
+		positionList->y[length] = (int)(index / 16 - 3);
 		length++;
 	} 
-	for (auto& p : target->moveableList)
+	for (auto& p : target.moveableList)
 	{
-		positionList->x[length] = p->x;
-		positionList->y[length] = p->y;
+		auto index = BitBoard::get_index(p);
+		positionList->x[length] = (int)(index % 16 - 3);
+		positionList->y[length] = (int)(index / 16 - 3);
 		length++;
 	}
 	positionList->length = length; 
