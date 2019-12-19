@@ -131,26 +131,26 @@ namespace ChessGame
         }
 
         private void OnAITurn()
-        { 
-            //var dllMap = logicMap.GetDLLMap();
-            //DecisionTreeDll.GetDecision(dllMap, out DecisionTreeDllDecision decision);
-            //var firstPosition = new Position
-            //{
-            //    x = decision.fromX,
-            //    y = decision.fromY,
-            //};
-            //var secondPosition = new Position
-            //{
-            //    x = decision.desX,
-            //    y = decision.desY,
-            //};
-            //this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-            //    (ThreadStart)delegate ()
-            //    {
-            //        logicMap.MoveChess(firstPosition, secondPosition);
-            //        isPlayerTurn = true; 
-            //        Board.HighlightedPostion = secondPosition;
-            //    });
+        {
+            var dllMap = logicMap.GetDLLMap();
+            DecisionTreeDll.GetDecision(dllMap, out DecisionTreeDllDecision decision);
+            var firstPosition = new Position
+            {
+                x = decision.fromX,
+                y = decision.fromY,
+            };
+            var secondPosition = new Position
+            {
+                x = decision.desX,
+                y = decision.desY,
+            };
+            this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                (ThreadStart)delegate ()
+                {
+                    logicMap.MoveChess(firstPosition, secondPosition);
+                    isPlayerTurn = true;
+                    Board.HighlightedPostion = secondPosition;
+                });
         }
 
         private void OnBorderMouseUp(int x, int y)

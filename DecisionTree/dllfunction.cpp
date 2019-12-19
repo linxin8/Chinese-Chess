@@ -24,6 +24,9 @@ void getDecision(int map[10][9], Decision* d)
 	//DLL_init(); 
 	//Tree tree(map);
 	//*d = *tree.deepSearch();
+	DLL_init();
+	BitTree tree(map);
+	tree.startSerach(d->fromX, d->fromY, d->desX, d->desY);
 }
 
 void getAccessiblePosition(int map[10][9], int x, int y, PositionList* positionList)
@@ -32,7 +35,8 @@ void getAccessiblePosition(int map[10][9], int x, int y, PositionList* positionL
 	//Tree tree(map);
 	//auto target = tree.getTarget(x, y);   
 	BitTree tree(map); 
-	std::cout << tree.getEstimatedValue() << '\n';
+	//std::cout << tree.getEstimatedValue(Black) << '\n';
+	//tree.printBoard();
 	auto target = tree.getTarget(x, y);
 	int length = 0; 
 	for (auto& p : target.assaultableList)
