@@ -572,7 +572,7 @@ private:
 	//static_assert((countFlagIndex(chessPositionInfoMask)) == 32);
 
 public:
-	uint64_t getHash()
+	uint64_t getHash()const
 	{
 		return rootHash;
 	}

@@ -2,12 +2,49 @@
 #include"bitboard.h"
 #include"estimate.h"
 #include<algorithm>
-
-//#define MYDEBUG_ACTION_SORTED_LIST
-#define MYDEBUG_SEARCH_PATH
+#include<ctime>
+//#define MYDEBUG_ACTION_SORTED_LIST 
 
 class BitTree
 {
+private: 
+	static constexpr int hashTableMask = (1 << 16) - 1;
+	struct HashTable
+	{
+		uint64_t key = 0;
+		int depth = 0;
+		enum Type
+		{
+			Upperbound,
+			Lowerbound,
+			PV
+		}type;
+		int value=0;
+	};
+	static HashTable hashTable[hashTableMask + 1];
+	void updateHash(uint64_t key, int depth, HashTable::Type type, int value)
+	{
+		auto index = key & hashTableMask;
+		auto& old = hashTable[index];
+		if (old.depth < depth)
+		{ 
+			old.depth = depth;
+			old.key = key;
+			old.type = type;
+			old.value = value;
+		}
+	}
+	const HashTable& getHash(uint64_t key) const
+	{
+		auto index = key & hashTableMask;
+		return hashTable[index];  
+	}
+	bool hasHash(uint64_t key)const 
+	{
+		auto index = key & hashTableMask;
+		auto& old = hashTable[index];
+		return old.key == key;
+	}
 public:
 	BitTree(int map[10][9]) :board(map)
 	{ 
@@ -31,6 +68,14 @@ public:
 		return action;
 	}
 
+	int estimateAction(uint64_t action,int country)
+	{ 
+		board.doAction(action);
+		auto value = board.getEstimatedValue(country);
+		board.undoAction();
+		return value;
+	}
+
 	void appendSortedAction(SimpleList<uint64_t, 100>& candidate,int country)
 	{ 
 		std::pair< int, uint64_t> buff[100];
@@ -50,10 +95,7 @@ public:
 					auto desType = board.get_type(desChess);
 					Debug::assert(desType != None);
 					auto action = makeAcion(fromIndex, desIndex, desType);
-					board.doAction(action);
-					auto value = board.getEstimatedValue(country);
-					board.undoAction();
-					buff[buffSize].first = value;
+					buff[buffSize].first = estimateAction(action, country);
 					buff[buffSize].second = action;
 					buffSize++;
 				}
@@ -62,10 +104,7 @@ public:
 					auto desChess = target.moveableList[j];
 					auto desIndex = board.get_index(desChess);
 					auto action = makeAcion(fromIndex, desIndex, None);
-					board.doAction(action);
-					auto value = board.getEstimatedValue(country);
-					board.undoAction();
-					buff[buffSize].first = value;
+					buff[buffSize].first = estimateAction(action, country);
 					buff[buffSize].second = action;
 					buffSize++;
 				}
@@ -159,14 +198,18 @@ public:
 	{
 		int alpha = -20000000;
 		int beta = 20000000;
-		uint64_t actionResult = 0; 
+		uint64_t actionResult = 0;
+		std::memset(hashTable, 0, sizeof(hashTable));
 		for (int depth = 1; depth <= 6; depth += 1)
 		{
-			std::cout << "step " << depth << '\n';
+			auto lastNodeCount = nodeCount;
+			auto time = std::clock();
+			std::cout << "step " << depth;
 			auto value = search(alpha, beta, Black, depth, actionResult);
-			std::cout << "best action ";
-			board.printAction(actionResult);
-			std::cout << "value " << value << '\n';
+			std::cout << ", node counted " << nodeCount - lastNodeCount
+				<< ", time " << std::clock() - time;
+			std::cout << ", value " << value << ", best action ";
+			board.printAction(actionResult); 
 		}
 		auto from = board.get_fromIndex(actionResult);
 		auto des = board.get_desIndex(actionResult);
@@ -179,6 +222,7 @@ public:
 	int quiescentSearch(int alpha, int beta, int country)
 	{
 		depth++;
+		nodeCount++;
 		if (board.isKingDied(country))
 		{
 			return -100000000 + depth;
@@ -229,6 +273,7 @@ public:
 	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult)
 	{ 
 		depth++;
+		nodeCount++;
 		if (board.isKingDied(country))
 		{
 			return -10000000 + depth;
@@ -237,7 +282,38 @@ public:
 		{
 			return quiescentSearch(alpha, beta, country);
 			//return getEstimatedValue(country);
-		}
+		} 
+
+		if (hasHash(board.getHash()))
+		{
+			auto& hash = getHash(board.getHash());
+			if (hash.depth >= depthLeft)
+			{
+				if (hash.type == HashTable::PV)
+				{
+					return hash.value;
+				}
+				else if (hash.type == HashTable::Lowerbound)
+				{
+					if (hash.value > alpha)
+					{
+						alpha = hash.value;
+					}
+				}
+				else if (hash.type == HashTable::Upperbound)
+				{
+					if (hash.value > beta)
+					{
+						beta = hash.value;
+					}
+				}
+				if (alpha >= beta)
+				{
+					return hash.value;
+				}
+			}
+		}  
+
 		SimpleList<uint64_t, 100> candidate;
 		if (board.isKingSafe(country))
 		{
@@ -263,6 +339,7 @@ public:
 				return alpha;
 			}
 		}
+
 		auto value = alpha;
 		bool pv = false;
 		for (int i = 0; i < candidate.length; i++)
@@ -295,6 +372,21 @@ public:
 				break;
 			}
 		}
+		if (!pv)
+		{// upperbound
+			updateHash(board.getHash(), depthLeft, HashTable::Upperbound, alpha);
+		}
+		else
+		{
+			if (alpha >= beta)
+			{// lowerbound
+				updateHash(board.getHash(), depthLeft, HashTable::Lowerbound, alpha);
+			}
+			else
+			{// pv
+				updateHash(board.getHash(), depthLeft, HashTable::PV, alpha);
+			}
+		}
 		depth--;
 		return alpha;
 	}
@@ -309,5 +401,6 @@ public:
 private:
 	BitBoard board;
 	int depth = 0;
+	int nodeCount = 0;
 };
 
