@@ -6,6 +6,19 @@
 //#define MYDEBUG_ACTION_SORTED_LIST 
 //#define MYDEBUG_HASH_COLLISION
 
+struct CounterGuard
+{
+	CounterGuard(int& i) :counter(i)
+	{
+		counter++;
+	}
+	~CounterGuard()
+	{
+		counter--;
+	}
+	int& counter;
+};
+
 class BitTree
 {
 private: 
@@ -86,6 +99,14 @@ public:
 			auto bestAction = getHash(hash).bestAction;
 			if (action == bestAction)
 			{
+				return 5000000;
+			}
+		}
+		for (int i = 0; i < 2; i++)
+		{
+			if (killAction[depth][i] == action)
+			{
+				
 				return 5000000;
 			}
 		}
@@ -241,7 +262,7 @@ public:
 
 	int quiescentSearch(int alpha, int beta, int country)
 	{
-		depth++;
+		CounterGuard guard(depth); 
 		nodeCount++;
 		if (board.isKingDied(country))
 		{
@@ -284,15 +305,14 @@ public:
 			{ 
 				break;
 			}
-		}
-		depth--;
+		} 
 		return alpha;
 	}
 
 
 	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult)
-	{ 
-		depth++;
+	{  
+		CounterGuard guard(depth);
 		nodeCount++;
 		if (board.isKingDied(country))
 		{
@@ -401,13 +421,14 @@ public:
 			if (alpha >= beta)
 			{// lowerbound
 				updateHash(board.getHash(), depthLeft, HashTable::Lowerbound, alpha,actionResult);
+				addKillAction(actionResult);
 			}
 			else
 			{// pv
 				updateHash(board.getHash(), depthLeft, HashTable::PV, alpha,actionResult);
+				addKillAction(actionResult);
 			}
-		}
-		depth--;
+		} 
 		return alpha;
 	}
 	void printBoard()const 
