@@ -4,6 +4,7 @@
 #include<algorithm>
 #include<ctime>
 //#define MYDEBUG_ACTION_SORTED_LIST 
+//#define MYDEBUG_HASH_COLLISION
 
 class BitTree
 {
@@ -20,18 +21,20 @@ private:
 			PV
 		}type;
 		int value=0;
+		uint64_t bestAction;
 	};
 	static HashTable hashTable[hashTableMask + 1];
-	void updateHash(uint64_t key, int depth, HashTable::Type type, int value)
+	void updateHash(uint64_t key, int depth, HashTable::Type type, int value, uint64_t bestAction=0)
 	{
 		auto index = key & hashTableMask;
 		auto& old = hashTable[index];
 		if (old.depth < depth)
-		{ 
+		{
 			old.depth = depth;
 			old.key = key;
 			old.type = type;
 			old.value = value;
+			old.bestAction = bestAction;
 		}
 	}
 	const HashTable& getHash(uint64_t key) const
@@ -43,6 +46,13 @@ private:
 	{
 		auto index = key & hashTableMask;
 		auto& old = hashTable[index];
+#ifdef MYDEBUG_HASH_COLLISION 
+		if (old.key == key)
+		{
+			std::cout << "hash hit " << key << '\n';
+			board.printBoard();
+		}
+#endif // MYDEBUG_HASH_COLLISION 
 		return old.key == key;
 	}
 public:
@@ -70,6 +80,15 @@ public:
 
 	int estimateAction(uint64_t action,int country)
 	{ 
+		auto hash = board.getHash();
+		if (hasHash(hash))
+		{
+			auto bestAction = getHash(hash).bestAction;
+			if (action == bestAction)
+			{
+				return 5000000;
+			}
+		}
 		board.doAction(action);
 		auto value = board.getEstimatedValue(country);
 		board.undoAction();
@@ -196,6 +215,7 @@ public:
 
 	void startSerach(int& fromX, int& fromY, int& desX, int& desY)
 	{
+		board.printBoard();
 		int alpha = -20000000;
 		int beta = 20000000;
 		uint64_t actionResult = 0;
@@ -380,11 +400,11 @@ public:
 		{
 			if (alpha >= beta)
 			{// lowerbound
-				updateHash(board.getHash(), depthLeft, HashTable::Lowerbound, alpha);
+				updateHash(board.getHash(), depthLeft, HashTable::Lowerbound, alpha,actionResult);
 			}
 			else
 			{// pv
-				updateHash(board.getHash(), depthLeft, HashTable::PV, alpha);
+				updateHash(board.getHash(), depthLeft, HashTable::PV, alpha,actionResult);
 			}
 		}
 		depth--;
@@ -398,9 +418,16 @@ public:
 	{
 		board.printAction(action);
 	}
+	void addKillAction(uint64_t action)
+	{
+		killAction[1][depth] = killAction[1][depth];
+		killAction[0][depth] = action;
+	}
+
 private:
 	BitBoard board;
 	int depth = 0;
 	int nodeCount = 0;
+	uint64_t killAction[100][2]{};
 };
 

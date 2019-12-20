@@ -81,7 +81,6 @@ extern int positionValue[2][8][256];
 extern int chessConfilictValue[8]; 
 extern int moveShiftValue[8];
 extern uint64_t chessHashTable[2][8][256];
-
 class BitBoard
 { 
 private: 
@@ -162,6 +161,14 @@ public:
 		std::printf("from %lld(%lld, %lld), des %lld(%lld, %lld)\n", from, from % 16 - 3, from / 16 - 3, des, des % 16 - 3, des / 16 - 3);
 	}
 
+	void updateRootHash(uint64_t chess)
+	{
+		auto type = get_type(chess);
+		auto country = get_country(chess);
+		auto index = get_index(chess);
+		rootHash^= chessHashTable[country][type][index];
+	}
+
 	void doAction(uint64_t action)
 	{
 #ifdef MYDEBUG_ACTION
@@ -198,8 +205,10 @@ public:
 		updateChess(newFromChess);
 		updateChess(newDesChess); 
 		partialUpdateAllTarget(fromIndex, desIndex);
-		rootHash ^= chessHashTable[get_country(fromChess)][fromType][fromIndex];
-		rootHash ^= chessHashTable[get_country(desChess)][desType][desIndex];
+		updateRootHash(fromChess);
+		updateRootHash(desChess);
+		updateRootHash(newFromChess);
+		updateRootHash(newDesChess); 
 	}
 
 	void undoAction()
@@ -238,8 +247,10 @@ public:
 		updateChess(newFromChess);
 		updateChess(newDesChess); 
 		undoPartialUpdateAllTarget(fromIndex, desIndex);
-		rootHash ^= chessHashTable[get_country(desChess)][desType][fromIndex];
-		rootHash ^= chessHashTable[get_country(fromChess)][coveredType][desIndex];
+		updateRootHash(fromChess);
+		updateRootHash(desChess);
+		updateRootHash(newFromChess);
+		updateRootHash(newDesChess);
 	}
 
 	void undoUpdateConflictValue(uint64_t chess)
