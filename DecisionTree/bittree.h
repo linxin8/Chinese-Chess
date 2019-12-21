@@ -22,7 +22,7 @@ struct CounterGuard
 class BitTree
 {
 private: 
-	static constexpr int hashTableMask = (1 << 16) - 1;
+	static constexpr int hashTableMask = (1 << 24) - 1;
 	struct HashTable
 	{
 		uint64_t key = 0;
@@ -101,19 +101,56 @@ public:
 			{
 				return 5000000;
 			}
-		}
-		for (int i = 0; i < 2; i++)
+		} 
+		auto value = INT_MIN;
+		if (killAction[depth][0] == 0)
 		{
-			if (killAction[depth][i] == action)
+			board.doAction(action);
+			value = board.getEstimatedValue(country);
+			board.undoAction();
+		}
+		else
+		{ 
+			for (int i = 0; i < 2; i++)
 			{
-				
-				return 5000000;
+				if (killAction[depth][i] == action)
+				{ 
+					return 5000000 - i;
+				}
 			}
 		}
-		board.doAction(action);
-		auto value = board.getEstimatedValue(country);
-		board.undoAction();
-		return value;
+		return 0;
+	}
+
+
+	void appendAllAction(SimpleList<uint64_t, 100>& candidate, int country)
+	{
+		for (int i = 0; i < 32; i++)
+		{
+			auto fromChess = board.getChessById(i);
+			if (board.get_type(fromChess) &&
+				board.get_country(fromChess) == country)
+			{
+				auto target = board.getTargetByChess(fromChess);
+				auto fromIndex = board.get_index(fromChess);
+				for (int j = 0; j < target.assaultableList.length; j++)
+				{
+					auto desChess = target.assaultableList[j];
+					auto desIndex = board.get_index(desChess);
+					auto desType = board.get_type(desChess);
+					Debug::assert(desType != None);
+					auto action = makeAcion(fromIndex, desIndex, desType); 
+					candidate.push_back(action);
+				}
+				for (int j = 0; j < target.moveableList.length; j++)
+				{
+					auto desChess = target.moveableList[j];
+					auto desIndex = board.get_index(desChess);
+					auto action = makeAcion(fromIndex, desIndex, None);
+					candidate.push_back(action);
+				}
+			}
+		}
 	}
 
 	void appendSortedAction(SimpleList<uint64_t, 100>& candidate,int country)
@@ -183,7 +220,10 @@ public:
 					auto desType = board.get_type(desChess);
 					Debug::assert(desType != None);
 					auto action = makeAcion(fromIndex, desIndex, desType);
-					candidate.push_back(action);
+					if (board.getChessValueByChess(desChess)>900)//ignore pawn¡¢ elephant ¡¢ guard
+					{
+						candidate.push_back(action); 
+					}
 				} 
 			}
 		} 
@@ -220,7 +260,7 @@ public:
 					auto desIndex = board.get_index(desChess);
 					Debug::assert(board.getChessByIndex(desIndex) == desChess);
 					auto desType = board.get_type(desChess);
-					Debug::assert(desType != None);
+					Debug::assert(desType == None);
 					auto action = makeAcion(fromIndex, desIndex, desType);
 					board.doAction(action);
 					if (board.isKingSafe(country))
@@ -236,21 +276,33 @@ public:
 
 	void startSerach(int& fromX, int& fromY, int& desX, int& desY)
 	{
+		for (auto& i : historyTable)
+		{
+			for (auto&j : i)
+			{
+				for (auto& k : j)
+				{
+					k >>= 1;
+				}
+			}
+		}
 		board.printBoard();
 		int alpha = -20000000;
 		int beta = 20000000;
 		uint64_t actionResult = 0;
-		std::memset(hashTable, 0, sizeof(hashTable));
-		for (int depth = 1; depth <= 6; depth += 1)
+		//std::memset(hashTable, 0, sizeof(hashTable));
+		for (int depth = 1; depth <= 8; depth += 1)
 		{
 			auto lastNodeCount = nodeCount;
 			auto time = std::clock();
 			std::cout << "step " << depth;
 			auto value = search(alpha, beta, Black, depth, actionResult);
+			//auto value = BNS(alpha, beta, Black, 7, actionResult);
 			std::cout << ", node counted " << nodeCount - lastNodeCount
 				<< ", time " << std::clock() - time;
 			std::cout << ", value " << value << ", best action ";
 			board.printAction(actionResult); 
+			printHashTableState();
 		}
 		auto from = board.get_fromIndex(actionResult);
 		auto des = board.get_desIndex(actionResult);
@@ -262,6 +314,11 @@ public:
 
 	int quiescentSearch(int alpha, int beta, int country)
 	{
+		//if (depth > 12)
+		//{
+		//	std::cout << depth << '\n';
+		//}
+
 		CounterGuard guard(depth); 
 		nodeCount++;
 		if (board.isKingDied(country))
@@ -269,6 +326,11 @@ public:
 			return -100000000 + depth;
 		}
 		auto estimate = getEstimatedValue(country);
+		if (estimate < alpha)
+		{
+			return estimate;
+		}
+
 		if (estimate > alpha)
 		{
 			alpha = estimate;
@@ -281,14 +343,18 @@ public:
 		if (board.isKingSafe(country))
 		{ 
 			appendQuiescentAction(candidate, country);
+			if (candidate.empty())
+			{
+				return estimate;
+			}
 		}
 		else
 		{
 			appendSafeAction(candidate, country);
-		}
-		if (candidate.empty())
-		{
-			return estimate;
+			if (candidate.empty())
+			{
+				return alpha;
+			}
 		}
 		for (int i = 0; i < candidate.length; i++)
 		{
@@ -307,8 +373,114 @@ public:
 			}
 		} 
 		return alpha;
+	}  
+
+	uint64_t tryTakeAction(SimpleList<uint64_t, 100>& candidate, uint64_t action)
+	{
+		for (int i = 0; i < candidate.length; i++)
+		{
+			if (candidate[i] == action)
+			{ 
+				for (int j = i+1; j < candidate.length; j++)
+				{
+					candidate[j - 1] = candidate[j];
+				}
+				candidate.pop_back();
+				return action;
+			}
+		}
+		return 0;
 	}
 
+	uint64_t takeBestAction(SimpleList<uint64_t, 100>& candidate, int country,int& step)
+	{
+		Debug::assert(!candidate.empty());
+		enum Step
+		{
+			Transposition,
+			AssaultInit, 
+			Kill,
+			HistoryInit,
+			History,
+		};
+		uint64_t resultAction;
+		if (step == Transposition)
+		{
+			step = Kill;
+			auto rootValue = board.getHash();
+			if (hasHash(rootValue))
+			{
+				auto action = getHash(rootValue).bestAction;
+				resultAction = tryTakeAction(candidate, action);
+				if (resultAction != 0)
+				{
+					return resultAction;
+				}
+			}
+		}
+		if (step == Kill)
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				auto action = killAction[depth][i];
+				if (tryTakeAction(candidate, action))
+				{
+					return action;
+				}
+			}
+			step = HistoryInit;
+		}
+		if (step == HistoryInit)
+		{//to do		
+			step = History;
+			std::pair<int, uint64_t> buff[100];
+			int buffSize = candidate.length;
+			for (int i = 0; i < candidate.length; i++)
+			{
+				auto action = candidate[i];
+				buff[i].second = action;   
+				buff[i].first = historyTable[country][board.get_fromIndex(action)][board.get_desIndex(action)];
+			}
+			if (isShallowDepth())
+			{
+				std::stable_sort(buff, buff + buffSize);
+			}
+			else
+			{
+				std::sort(buff, buff + buffSize);
+			}
+			candidate.clear();
+			for (int i = buffSize - 1; i >= 0; i--)
+			{
+				candidate.push_back(buff[i].second);
+			}
+		}   
+		if (step == History)
+		{
+			auto action = candidate[0];
+			//Debug::assert(board.get_coveredType(action) == None);
+			return tryTakeAction(candidate, action);
+		}
+		return 0;
+	}
+
+	bool isShallowDepth()const
+	{
+		return depth < 5;
+	}
+
+	void printHashTableState()
+	{
+		int cnt = 0;
+		for (int i = 0; i < hashTableMask; i++)
+		{
+			if (hashTable[i].key != 0)
+			{
+				cnt++;
+			}
+		}
+		std::cout << "hssh table " << cnt << " / " << hashTableMask << " (" << (double)cnt / hashTableMask << ") \n";
+	}
 
 	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult)
 	{  
@@ -365,11 +537,18 @@ public:
 				depthLeft -= 4;
 				if (depthLeft <= 0)
 				{
-					//return quiescentSearch(alpha, beta,country);
-					return getEstimatedValue(country);
+					return quiescentSearch(alpha, beta,country);
+					//return getEstimatedValue(country);
 				}
 			}
-			appendSortedAction(candidate, country);
+			if (isShallowDepth())
+			{
+				appendSortedAction(candidate, country);
+			}
+			else
+			{
+				appendAllAction(candidate, country);
+			}
 		}
 		else
 		{
@@ -382,10 +561,11 @@ public:
 
 		auto value = alpha;
 		bool pv = false;
-		for (int i = 0; i < candidate.length; i++)
+		
+		int takeStep = 0;
+		while(!candidate.empty())
 		{
-			auto action = candidate[i];
-			uint64_t bestAction = 0;
+			auto action = takeBestAction(candidate, country, takeStep); 
 			uint64_t subActionResult = 0;
 			board.doAction(action);
 			if (pv)
@@ -422,14 +602,112 @@ public:
 			{// lowerbound
 				updateHash(board.getHash(), depthLeft, HashTable::Lowerbound, alpha,actionResult);
 				addKillAction(actionResult);
+				historyTable[country][board.get_fromIndex(actionResult)][board.get_desIndex(actionResult)] += 1 << depthLeft;
 			}
 			else
 			{// pv
 				updateHash(board.getHash(), depthLeft, HashTable::PV, alpha,actionResult);
 				addKillAction(actionResult);
+				historyTable[country][board.get_fromIndex(actionResult)][board.get_desIndex(actionResult)] += 1 << depthLeft;
 			}
 		} 
 		return alpha;
+	}
+	int BNS(int alpha, int beta, int country, int depthLeft, uint64_t& actionResult)
+	{ 
+		CounterGuard guard(depth);
+		nodeCount++;
+		if (board.isKingDied(country))
+		{
+			return -10000000 + depth;
+		}
+		if (depthLeft <= 0)
+		{
+			return quiescentSearch(alpha, beta, country);
+			//return getEstimatedValue(country);
+		}
+		SimpleList<uint64_t, 100> candidate;
+		if (board.isKingSafe(country))
+		{
+			auto R = depthLeft > 6 ? 4 : 3;
+			uint64_t actionResult = 0;
+			auto value = -search(-beta, -beta + 1, !country, depthLeft - R - 1, actionResult);
+			if (value >= beta)
+			{
+				depthLeft -= 4;
+				if (depthLeft <= 0)
+				{
+					//return quiescentSearch(alpha, beta,country);
+					return getEstimatedValue(country);
+				}
+			}
+			//appendSortedAction(candidate, country);
+			appendAllAction(candidate, country);
+		}
+		else
+		{
+			appendSafeAction(candidate, country);
+			if (candidate.empty())
+			{
+				return alpha;
+			}
+		}
+
+		auto subtreeCount = candidate.length;
+		auto betterCount = 0;
+		alpha =-10000;
+		beta = 10000;
+		bool able[1000]{};
+		for (int i = 0; i < 1000; i++)
+		{
+			able[i] = true;
+		}
+		while (alpha+1 < beta && betterCount != 1)
+		{
+			//auto test = int(alpha + std::max(1.0, (beta - alpha)*(subtreeCount - 1) / double(subtreeCount)));
+			//if (test == alpha)
+			//{
+			//	test++;
+			//}		
+			//if (test == beta)
+			//{
+			//	test--;
+			//}
+			auto test = (alpha + beta) / 2;
+			betterCount = 0;
+			for (int i = 0; i < candidate.length; i++)
+			{
+				if (!able[i])
+				{
+					continue;
+				}
+				uint64_t subBsetAction;
+				auto bestVal = -search(-test, -test + 1, country, depthLeft, subBsetAction);
+				if (bestVal >= test)
+				{
+					betterCount++;
+					actionResult = candidate[i]; 
+					if (betterCount >= 2)
+					{
+						break;
+					}
+				}
+				else
+				{
+					able[i] = false;
+				}
+			}
+			if (betterCount == 0)
+			{
+				beta = test;
+			}
+			else
+			{
+				alpha = test;
+				subtreeCount = betterCount;
+			}
+		}
+		return 0;
 	}
 	void printBoard()const 
 	{
@@ -450,5 +728,6 @@ private:
 	int depth = 0;
 	int nodeCount = 0;
 	uint64_t killAction[100][2]{};
+	static int historyTable[2][256][256];
 };
 

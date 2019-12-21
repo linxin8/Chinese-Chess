@@ -4,7 +4,7 @@
 #include<iostream>
 #include<bitset>
 
-//#define MYDEBUG
+#define MYDEBUG
 //#define MYDEBUG_PARTIAL_UPDATE
 //#define MYDEBUG_ACTION
 
@@ -141,6 +141,19 @@ public:
 		initPawn();
 		load(map);
 		initUpdateTarget();
+	}
+
+	int getChessValueByChess(uint64_t chess)
+	{
+		auto type = get_type(chess);
+		auto index = get_index(chess);
+		auto country = get_country(chess);
+		return chessValue[get_type(chess)]+positionValue[country][type][index];
+	} 
+
+	bool isConflictFailed(uint64_t chess)
+	{
+		return conflictCountById[get_globalId(chess)] < 0;
 	}
 
 	void updateChess(uint64_t newChess)
