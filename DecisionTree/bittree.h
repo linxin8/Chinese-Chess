@@ -1,8 +1,8 @@
 #pragma once
-#include"bitboard.h"
-#include"estimate.h"
+#include"bitboard.h" 
 #include<algorithm>
 #include<ctime>
+#include<climits>
 //#define MYDEBUG_ACTION_SORTED_LIST 
 //#define MYDEBUG_HASH_COLLISION
 
@@ -17,6 +17,19 @@ struct CounterGuard
 		counter--;
 	}
 	int& counter;
+};
+
+struct ListGuard
+{
+	ListGuard(SimpleList<uint64_t,200>& list, uint64_t nextValue) :list(list)
+	{ 
+		list.push_back(nextValue);
+	}
+	~ListGuard()
+	{
+		list.pop_back();
+	}
+	SimpleList<uint64_t, 200>& list;
 };
 
 class BitTree
@@ -220,10 +233,11 @@ public:
 					auto desType = board.get_type(desChess);
 					Debug::assert(desType != None);
 					auto action = makeAcion(fromIndex, desIndex, desType);
-					if (board.getChessValueByChess(desChess)>900)//ignore pawn、 elephant 、 guard
-					{
-						candidate.push_back(action); 
-					}
+					//if (board.getChessValueByChess(desChess)>900)//ignore pawn、 elephant 、 guard
+					//{
+					//	candidate.push_back(action); 
+					//}
+					candidate.push_back(action); 
 				} 
 			}
 		} 
@@ -273,107 +287,19 @@ public:
 		}
 	}
 
-
-	void startSerach(int& fromX, int& fromY, int& desX, int& desY)
+	bool isCurrentStateRepeated()
 	{
-		for (auto& i : historyTable)
+		auto hash = board.getHash();
+		for (int i = 0; i < stateHistory.length; i++)
 		{
-			for (auto&j : i)
+			if (i == hash)
 			{
-				for (auto& k : j)
-				{
-					k >>= 1;
-				}
+				return true;
 			}
 		}
-		board.printBoard();
-		int alpha = -20000000;
-		int beta = 20000000;
-		uint64_t actionResult = 0;
-		//std::memset(hashTable, 0, sizeof(hashTable));
-		for (int depth = 1; depth <= 8; depth += 1)
-		{
-			auto lastNodeCount = nodeCount;
-			auto time = std::clock();
-			std::cout << "step " << depth;
-			auto value = search(alpha, beta, Black, depth, actionResult);
-			//auto value = BNS(alpha, beta, Black, 7, actionResult);
-			std::cout << ", node counted " << nodeCount - lastNodeCount
-				<< ", time " << std::clock() - time;
-			std::cout << ", value " << value << ", best action ";
-			board.printAction(actionResult); 
-			printHashTableState();
-		}
-		auto from = board.get_fromIndex(actionResult);
-		auto des = board.get_desIndex(actionResult);
-		fromX = (int)(from % 16 - 3);
-		fromY = (int)(from / 16 - 3);
-		desX = (int)(des % 16 - 3);
-		desY = (int)(des / 16 - 3);
+		return false;
 	}
 
-	int quiescentSearch(int alpha, int beta, int country)
-	{
-		//if (depth > 12)
-		//{
-		//	std::cout << depth << '\n';
-		//}
-
-		CounterGuard guard(depth); 
-		nodeCount++;
-		if (board.isKingDied(country))
-		{
-			return -100000000 + depth;
-		}
-		auto estimate = getEstimatedValue(country);
-		if (estimate < alpha)
-		{
-			return estimate;
-		}
-
-		if (estimate > alpha)
-		{
-			alpha = estimate;
-		}
-		if (alpha >= beta)
-		{
-			return alpha;
-		}
-		SimpleList<uint64_t, 100> candidate;
-		if (board.isKingSafe(country))
-		{ 
-			appendQuiescentAction(candidate, country);
-			if (candidate.empty())
-			{
-				return estimate;
-			}
-		}
-		else
-		{
-			appendSafeAction(candidate, country);
-			if (candidate.empty())
-			{
-				return alpha;
-			}
-		}
-		for (int i = 0; i < candidate.length; i++)
-		{
-			auto action = candidate[i];
-			uint64_t bestAction = 0;
-			board.doAction(action);
-			auto value = -quiescentSearch(-beta, -alpha, !country);
-			board.undoAction();
-			if (value > alpha)
-			{ 
-				alpha = value;
-			}
-			if (alpha >= beta)
-			{ 
-				break;
-			}
-		} 
-		return alpha;
-	}  
 
 	uint64_t tryTakeAction(SimpleList<uint64_t, 100>& candidate, uint64_t action)
 	{
@@ -439,16 +365,16 @@ public:
 			{
 				auto action = candidate[i];
 				buff[i].second = action;   
-				buff[i].first = historyTable[country][board.get_fromIndex(action)][board.get_desIndex(action)];
+				buff[i].first = historyTable[country][board.get_fromIndex(action)][board.get_desIndex(action)] + (candidate.length - i);
 			}
-			if (isShallowDepth())
-			{
-				std::stable_sort(buff, buff + buffSize);
-			}
-			else
-			{
+			//if (isShallowDepth())
+			//{
+			//	std::stable_sort(buff, buff + buffSize);
+			//}
+			//else
+			//{
 				std::sort(buff, buff + buffSize);
-			}
+			//}
 			candidate.clear();
 			for (int i = buffSize - 1; i >= 0; i--)
 			{
@@ -482,8 +408,133 @@ public:
 		std::cout << "hssh table " << cnt << " / " << hashTableMask << " (" << (double)cnt / hashTableMask << ") \n";
 	}
 
+	int quiescentSearch(int alpha, int beta, int country, int qdepth = 0)
+	{
+		//if (depth > 12)
+		//{
+		//	std::cout << depth << '\n';
+		//}
+		CounterGuard guard(depth);
+		nodeCount++;
+		if (board.isKingDied(country))
+		{
+			return -100000000 + depth;
+		}
+		auto estimate = getEstimatedValue(country);
+		if (qdepth >= 6)
+		{
+			return estimate;
+		} 
+		//if (depth >= 12)
+		//{
+		//	return estimate;
+		//}
+
+		if (estimate > alpha)
+		{
+			alpha = estimate;
+		}
+		if (alpha >= beta)
+		{
+			return alpha;
+		}
+		SimpleList<uint64_t, 100> candidate;
+		if (board.isKingSafe(country))
+		{
+			appendQuiescentAction(candidate, country);
+			if (candidate.empty())
+			{
+				return estimate;
+			}
+		}
+		else
+		{
+			appendSafeAction(candidate, country);
+			if (candidate.empty())
+			{
+				return alpha;
+			}
+		}
+		for (int i = 0; i < candidate.length; i++)
+		{
+			auto action = candidate[i];
+			uint64_t bestAction = 0;
+			board.doAction(action);
+			auto value = -quiescentSearch(-beta, -alpha, !country, qdepth + 1);
+			board.undoAction();
+			if (value > alpha)
+			{
+				alpha = value;
+			}
+			if (alpha >= beta)
+			{
+				break;
+			}
+		}
+		return alpha;
+	}
+
+
+	void startSerach(int& fromX, int& fromY, int& desX, int& desY)
+	{
+		static int chessCount[2]{};
+		static int chessValue[2]{};
+		if (board.countChess(Black) != chessCount[Black] || board.countChess(Red) != chessCount[Red])
+		{
+			std::memset(hashTable, 0, sizeof(hashTable));
+			stateHistory.clear();
+		}
+		chessCount[Black] = board.countChess(Black);
+		chessCount[Red] = board.countChess(Red);
+		chessValue[Black] = board.countValue(Black);
+		chessValue[Red] = board.countValue(Red);
+		for (auto& i : historyTable)
+		{
+			for (auto&j : i)
+			{
+				for (auto& k : j)
+				{
+					k >>= 2;
+				}
+			}
+		}
+		board.printBoard();
+		int alpha = -20000000;
+		int beta = 20000000;
+		uint64_t actionResult = 0;
+		//std::memset(hashTable, 0, sizeof(hashTable));
+		for (int depth = 1; depth < 20; depth += 1)
+		{
+			auto lastNodeCount = nodeCount;
+			auto time = std::clock();
+			std::cout << "step " << depth;
+			auto value = search(alpha, beta, Black, depth, actionResult);
+			//auto value = BNS(alpha, beta, Black, 7, actionResult);
+			std::cout << ", node counted " << nodeCount - lastNodeCount
+				<< ", time " << double(std::clock() - time) / CLOCKS_PER_SEC;
+			std::cout << ", value " << value << ", best action ";
+			board.printAction(actionResult);
+			printHashTableState();
+			if (double(std::clock() - time) / CLOCKS_PER_SEC > 2)
+			{
+				break;
+			}
+		}
+		auto from = board.get_fromIndex(actionResult);
+		auto des = board.get_desIndex(actionResult);
+		fromX = (int)(from % 16 - 3);
+		fromY = (int)(from / 16 - 3);
+		desX = (int)(des % 16 - 3);
+		desY = (int)(des / 16 - 3);
+	} 
+
 	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult,bool ableNullMove=true)
 	{  
+		if (isCurrentStateRepeated())
+		{ 
+			return -20000000;
+		}
+		ListGuard	listGuard(stateHistory, board.getHash());
 		CounterGuard guard(depth);
 		nodeCount++;
 		if (board.isKingDied(country))
@@ -527,7 +578,8 @@ public:
 		}  
 
 		SimpleList<uint64_t, 100> candidate;
-		if (board.isKingSafe(country))
+		bool safe = board.isKingSafe(country);
+		if (safe)
 		{
 			if (ableNullMove)
 			{ 
@@ -544,14 +596,14 @@ public:
 					}
 				}
 			}
-			if (isShallowDepth())
-			{
-				appendSortedAction(candidate, country);
-			}
-			else
-			{
+			//if (isShallowDepth())
+			//{
+			//	appendSortedAction(candidate, country);
+			//}
+			//else
+			//{
 				appendAllAction(candidate, country);
-			}
+			//}
 		}
 		else
 		{
@@ -564,18 +616,34 @@ public:
 
 		auto value = alpha;
 		bool pv = false;
-		
+		 
 		int takeStep = 0;
+		int actionDone = 0;
 		while(!candidate.empty())
 		{
 			auto action = takeBestAction(candidate, country, takeStep); 
+			actionDone++;
 			uint64_t subActionResult = 0;
 			board.doAction(action);
 			if (pv)
 			{
-				value = -search(-alpha - 1, -alpha, !country, depthLeft - 1, subActionResult);
+				//value = -search(-alpha - 1, -alpha, !country, depthLeft - 1, subActionResult);
+				//if (safe&&board.get_coveredType(action)!=None&&actionDone > 3 && depthLeft > 3)
+				//{// shallow dectect
+				//	//value = -search(-alpha - 1, -alpha, !country, depthLeft - 3, subActionResult); 
+				//	//if (alpha < value&&value < beta)
+				//	//{
+
+				//	//	value = -search(-alpha - 1, -alpha, !country, depthLeft - 1, subActionResult);
+				//	//}
+				//	value = -search(-beta, -alpha, !country, depthLeft-2, subActionResult);
+				//} 
+				//else
+				//{ 
+					value = -search(-alpha - 1, -alpha, !country, depthLeft - 1, subActionResult);
+				//}
 				if (alpha < value&&value < beta)
-				{
+				{ 
 					value = -search(-beta, -alpha, !country, depthLeft - 1, subActionResult);
 				} 
 			}
@@ -731,6 +799,7 @@ private:
 	int depth = 0;
 	int nodeCount = 0;
 	uint64_t killAction[100][2]{};
-	static int historyTable[2][256][256];
+	static int historyTable[2][256][256]; 
+	SimpleList<uint64_t,200> stateHistory;
+	int timeCount = 0;
 };
-

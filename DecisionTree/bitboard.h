@@ -4,7 +4,7 @@
 #include<iostream>
 #include<bitset>
 
-#define MYDEBUG
+//#define MYDEBUG
 //#define MYDEBUG_PARTIAL_UPDATE
 //#define MYDEBUG_ACTION
 
@@ -165,6 +165,40 @@ public:
 		{ 
 			boardById[globalId] = newChess;
 		}
+	}
+
+	int countChess(int country)
+	{
+		int ret = 0;
+		for (int i = 0; i < 32; i++)
+		{
+			auto chess = getChessById(i);
+			if (get_type(chess))
+			{
+				if (get_country(chess)==country)
+				{
+					ret++;
+				}
+			}
+		}
+		return ret;
+	}
+
+	int countValue(int country)
+	{
+		int ret = 0;
+		for (int i = 0; i < 32; i++)
+		{
+			auto chess = getChessById(i);
+			if (get_type(chess))
+			{
+				if (get_country(chess) == country)
+				{
+					ret += getChessValueByChess(chess);
+				}
+			}
+		}
+		return ret;
 	}
 
 	void printAction(uint64_t action)const
