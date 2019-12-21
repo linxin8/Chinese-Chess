@@ -482,7 +482,7 @@ public:
 		std::cout << "hssh table " << cnt << " / " << hashTableMask << " (" << (double)cnt / hashTableMask << ") \n";
 	}
 
-	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult)
+	int search(int alpha, int beta, int country, int depthLeft,uint64_t& actionResult,bool ableNullMove=true)
 	{  
 		CounterGuard guard(depth);
 		nodeCount++;
@@ -529,16 +529,19 @@ public:
 		SimpleList<uint64_t, 100> candidate;
 		if (board.isKingSafe(country))
 		{
-			auto R = depthLeft > 6 ? 4 : 3; 
-			uint64_t actionResult = 0;
-			auto value = -search(-beta, -beta + 1, !country, depthLeft - R - 1, actionResult);
-			if (value >= beta)
-			{
-				depthLeft -= 4;
-				if (depthLeft <= 0)
+			if (ableNullMove)
+			{ 
+				auto R = depthLeft > 6 ? 4 : 3;
+				uint64_t actionResult = 0;
+				auto value = -search(-beta, -beta + 1, !country, depthLeft - R - 1, actionResult,false);
+				if (value >= beta)
 				{
-					return quiescentSearch(alpha, beta,country);
-					//return getEstimatedValue(country);
+					depthLeft -= 4;
+					if (depthLeft <= 0)
+					{
+						return quiescentSearch(alpha, beta, country);
+						//return getEstimatedValue(country);
+					}
 				}
 			}
 			if (isShallowDepth())
