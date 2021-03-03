@@ -130,6 +130,10 @@ namespace ChessGame
                 x = decision.desX,
                 y = decision.desY,
             };
+            Board.SelectedPostion = firstPosition;
+            List<Position> positions = new List<Position>();
+            positions.Add(secondPosition);
+            Board.HintedPosition = positions;
             logicMap.MoveChess(firstPosition, secondPosition);
         }
 
