@@ -23,11 +23,12 @@ namespace ChessGame
         public event BoardMouseUpEventHandler BoardMouseUp;
         private Button[,] textButton = new Button[10, 9];
         private Position? selectedPostion;
+        private Position? highlightedPostion;
         private Brush orignalBrush = Brushes.LightGray;
         public Position? SelectedPostion
         { get { return selectedPostion; }
             set
-            {
+            { 
                 if (selectedPostion != null)
                 {
                     ResetBackgroundColor(selectedPostion.Value);
@@ -36,6 +37,22 @@ namespace ChessGame
                 if (selectedPostion != null)
                 {
                     SetBackgroundColor(selectedPostion.Value, Brushes.LightGreen);
+                }
+            }
+        }
+        public Position? HighlightedPostion
+        {
+            get { return highlightedPostion; }
+            set
+            {
+                if (highlightedPostion != null)
+                {
+                    ResetBackgroundColor(highlightedPostion.Value);
+                }
+                highlightedPostion = value;
+                if (highlightedPostion != null)
+                {
+                    SetBackgroundColor(highlightedPostion.Value, Brushes.LightGreen);
                 }
             }
         }

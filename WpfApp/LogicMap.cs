@@ -7,6 +7,7 @@ namespace ChessGame
         public delegate void MapUpdateHandler(Chess[,] map);
         public event MapUpdateHandler MapUpdate;
         private readonly Chess [,] map  = new Chess[Rule.MapRow, Rule.MapColomn];
+        public Chess[,] ChessMap => map;
         public LogicMap()
         {
             LoadOpeningMap();

@@ -18,28 +18,10 @@
     <ClInclude Include="dllfunction.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="tree.h">
+    <ClInclude Include="bitboard.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="node.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="chess.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="debug.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="chessPosition.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="hash.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="trick.h">
+    <ClInclude Include="bittree.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,25 +29,10 @@
     <ClCompile Include="dllfunction.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="tree.cpp">
+    <ClCompile Include="bitboard.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="node.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="chess.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="common.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="debug.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="chessPosition.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="hash.cpp">
+    <ClCompile Include="bittree.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

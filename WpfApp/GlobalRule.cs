@@ -18,11 +18,6 @@ namespace ChessGame
         {
             return new Position { x = left.x - right.x, y = left.y - right.y };
         }
-
-        public static implicit operator List<object>(Position v)
-        {
-            throw new NotImplementedException();
-        }
     }
     public class Rule
     { 

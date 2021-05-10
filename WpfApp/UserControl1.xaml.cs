@@ -47,13 +47,13 @@ namespace ChessGame
             public int[] y;
             public int length;
         };  
-        [DllImport(@"decisiontree.dll",EntryPoint ="getVersion", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"Decisiontree.dll",EntryPoint ="getVersion", CallingConvention = CallingConvention.Cdecl)]
         public static extern  int GetVersion();
-        [DllImport(@"decisiontree.dll", EntryPoint = "getName", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"Decisiontree.dll", EntryPoint = "getName", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr GetName();
-        [DllImport(@"decisiontree.dll", EntryPoint = "getDecision", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"Decisiontree.dll", EntryPoint = "getDecision", CallingConvention = CallingConvention.Cdecl)]
         public static extern void GetDecision([MarshalAs(UnmanagedType.LPArray,SizeConst =90)] int[,] map,out DecisionTreeDllDecision decision);
-        [DllImport(@"decisiontree.dll", EntryPoint = "getAccessiblePosition", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"Decisiontree.dll", EntryPoint = "getAccessiblePosition", CallingConvention = CallingConvention.Cdecl)]
         private static extern void _GetAccessiblePosition([MarshalAs(UnmanagedType.LPArray, SizeConst = 90)] int[,] map, int x, int y, out PositionList positionList);
         public static List<Position> GetAccessiblePosition(int[,] map, int x, int y)
         {
