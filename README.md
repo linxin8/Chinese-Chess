@@ -4,7 +4,7 @@
 
 ## Demo
 
-![GitHub](https://github.com/linxin8/Chinese-Chess/master/demo.gif "demo")
+![GitHub](https://github.com/linxin8/Chinese-Chess/master/blob/demo.gif "demo")
 
 ## 基础博弈算法
 
