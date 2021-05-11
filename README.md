@@ -4,7 +4,7 @@
 
 ## Demo
 
-![GitHub](https://github.com/linxin8/Chinese-Chess/master/blob/demo.gif "demo")
+![GitHub](https://github.com/linxin8/Chinese-Chess/blob/master/demo.gif "demo")
 
 ## 基础博弈算法
 
@@ -27,7 +27,7 @@ def search(state):
         search(node)
 ```
 
-![GitHub](https://github.com/linxin8/Chinese-Chess/master/Doc/game-tree.png "game-tree")
+![GitHub](https://github.com/linxin8/Chinese-Chess/blob/master/Doc/game-tree.png "game-tree")
 
 ### 极小极大搜索
 
@@ -54,7 +54,7 @@ def minmax(state, is_maximizing_player):
     return value 
 ```
 
-![GitHub](https://github.com/linxin8/Chinese-Chess/master/Doc/min-max.png "min-max")
+![GitHub](https://github.com/linxin8/Chinese-Chess/blob/master/Doc/min-max.png "min-max")
 
 ### Alpha-Beta 剪枝
 
@@ -83,7 +83,7 @@ def alpha_beta_pruning(state, alpha, beta, is_maximizing_player):
     
 ```
 
-![GitHub](https://github.com/linxin8/Chinese-Chess/master/Doc/alph-beta.png "alph-beta")
+![GitHub](https://github.com/linxin8/Chinese-Chess/blob/master/Doc/alph-beta.png "alph-beta")
 
 ### NegaMax
 
